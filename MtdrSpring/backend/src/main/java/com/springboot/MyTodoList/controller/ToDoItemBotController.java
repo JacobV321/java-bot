@@ -44,13 +44,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		this.toDoItemService = toDoItemService;
 		this.botName = botName;
 	}
-	private void printRolesToConsole() {
-        List<Roles> roles = rolesService.findAll();
-        logger.info("Roles disponibles:");
-        for (Roles role : roles) {
-            logger.info("ID: " + role.getId() + ", Nombre: " + role.getNombre());
-        }
-    }
+	
 
 	@Override
 	public void onUpdateReceived(Update update) {
@@ -62,7 +56,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
 			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
 					|| messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
-				printRolesToConsole();
+				
 				SendMessage messageToTelegram = new SendMessage();
 				messageToTelegram.setChatId(chatId);
 				messageToTelegram.setText(BotMessages.HELLO_MYTODO_BOT.getMessage());
