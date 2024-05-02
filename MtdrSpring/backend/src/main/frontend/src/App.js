@@ -184,6 +184,7 @@ function App() {
       );
     }
     return (
+      //hacer logica de login/usuario aqui, condicional, con doble renderizado;
       <div className="App">
         <h1>MY TODO LIST</h1>
         <NewItem addItem={addItem} isInserting={isInserting}/>
