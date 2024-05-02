@@ -40,11 +40,13 @@ public class MyTodoListApplication implements CommandLineRunner {
 	}
 
 	private void printRolesToConsole() {
-        List<Roles> roles = rolesService.findAll();
+        try{List<Roles> roles = rolesService.findAll();
         logger.info("Roles disponibles:");
         for (Roles role : roles) {
             logger.info("ID: " + role.getId() + ", Nombre: " + role.getNombre());
-        }
+        }}catch (Exception e){
+			logger.error("Error al imprimir los roles en la consola: " + e.getMessage(), e);
+		}
     }
 
 	@Override
