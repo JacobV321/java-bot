@@ -1,9 +1,10 @@
 package com.springboot.MyTodoList.controller;
-
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.springboot.MyTodoList.model.Roles;
+import com.springboot.MyTodoList.service.RolesService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+
 import com.springboot.MyTodoList.model.ToDoItem;
 import com.springboot.MyTodoList.service.ToDoItemService;
 import com.springboot.MyTodoList.util.BotCommands;
@@ -33,6 +35,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
 	private ToDoItemService toDoItemService;
 	private String botName;
+	private RolesService rolesService;
 
 	public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService) {
 		super(botToken);
@@ -41,6 +44,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		this.toDoItemService = toDoItemService;
 		this.botName = botName;
 	}
+	private void printRolesToConsole() {
+        List<Roles> roles = rolesService.findAll();
+        logger.info("Roles disponibles:");
+        for (Roles role : roles) {
+            logger.info("ID: " + role.getId() + ", Nombre: " + role.getNombre());
+        }
+    }
 
 	@Override
 	public void onUpdateReceived(Update update) {
@@ -52,7 +62,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
 			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
 					|| messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
-
+				printRolesToConsole();
 				SendMessage messageToTelegram = new SendMessage();
 				messageToTelegram.setChatId(chatId);
 				messageToTelegram.setText(BotMessages.HELLO_MYTODO_BOT.getMessage());
