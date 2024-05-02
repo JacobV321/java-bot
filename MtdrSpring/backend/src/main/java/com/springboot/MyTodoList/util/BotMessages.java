@@ -1,13 +1,11 @@
 package com.springboot.MyTodoList.util;
 
-import com.springboot.MyTodoList.model.Roles;
-import com.springboot.MyTodoList.service.RolesService;
 
 import java.util.List;
 
 public enum BotMessages {
 
-    HELLO_MYTODO_BOT("Hello! I'm MyTodoList Bot!\nType a new todo item below and press the send button (blue arrow), or select an option below:\nNumber of roles: %d"),
+    HELLO_MYTODO_BOT("Hello! I'm MyTodoList Bot!\nType a new todo item below and press the send button (blue arrow), or select an option below"),
 
     BOT_REGISTERED_STARTED("Bot registered and started successfully!"),
     ITEM_DONE("Item done! Select /todolist to return to the list of todo items, or /start to go to the main screen."),
@@ -31,10 +29,4 @@ public enum BotMessages {
         return String.format(message, numberOfRoles);
     }
 
-    public static String getHelloMessage() {
-        RolesService rolesService = new RolesService();
-        List<Roles> roles = rolesService.findAll();
-        int numberOfRoles = roles.size();
-        return String.format(HELLO_MYTODO_BOT.getMessage(), numberOfRoles);
-    }
 }
