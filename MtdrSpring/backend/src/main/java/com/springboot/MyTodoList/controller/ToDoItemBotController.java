@@ -225,16 +225,15 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
 			else {
 				try {
-					ToDoItem newItem = new ToDoItem();
-					newItem.setDescription(messageTextFromTelegram);
-					newItem.setCreation_ts(OffsetDateTime.now());
-					newItem.setDone(false);
-					ResponseEntity entity = addToDoItem(newItem);
-
+					// Aquí puedes realizar cualquier acción adicional que desees realizar
+					// cuando un usuario envíe un mensaje de texto normal sin agregar una tarea.
+				
+					// En este ejemplo, simplemente se envía un mensaje al usuario indicando que
+					// el bot no comprendió el mensaje.
 					SendMessage messageToTelegram = new SendMessage();
 					messageToTelegram.setChatId(chatId);
-					messageToTelegram.setText(BotMessages.NEW_ITEM_ADDED.getMessage());
-
+					messageToTelegram.setText("Sorry, I didn't understand that.");
+				
 					execute(messageToTelegram);
 				} catch (Exception e) {
 					logger.error(e.getLocalizedMessage(), e);
