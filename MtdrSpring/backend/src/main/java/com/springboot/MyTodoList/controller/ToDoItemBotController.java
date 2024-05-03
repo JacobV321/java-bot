@@ -105,11 +105,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                     logger.error(e.getLocalizedMessage(), e);
                 }
 
-			} else if (messageTextFromTelegram.equals(BotLabels.DEV.getLabel())) {
-                // Options for Manager
+	} else if (messageTextFromTelegram.equals(BotLabels.DEV.getLabel())) {
+                // Options for Dev
                 SendMessage messageToTelegram = new SendMessage();
                 messageToTelegram.setChatId(chatId);
-                messageToTelegram.setText("Manager Options:");
+                messageToTelegram.setText("Dev Options:");
 
                 ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
                 List<KeyboardRow> keyboard = new ArrayList<>();
