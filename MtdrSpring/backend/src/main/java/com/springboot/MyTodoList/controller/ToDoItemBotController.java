@@ -42,48 +42,96 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	}
 
 	@Override
-	public void onUpdateReceived(Update update) {
+    public void onUpdateReceived(Update update) {
 
-		if (update.hasMessage() && update.getMessage().hasText()) {
+        if (update.hasMessage() && update.getMessage().hasText()) {
 
-			String messageTextFromTelegram = update.getMessage().getText();
-			long chatId = update.getMessage().getChatId();
+            String messageTextFromTelegram = update.getMessage().getText();
+            long chatId = update.getMessage().getChatId();
 
-			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
-					|| messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
+            if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())) {
 
-				SendMessage messageToTelegram = new SendMessage();
-				messageToTelegram.setChatId(chatId);
-				messageToTelegram.setText(BotMessages.HELLO_MYTODO_BOT.getMessage());
+                SendMessage messageToTelegram = new SendMessage();
+                messageToTelegram.setChatId(chatId);
+                messageToTelegram.setText(BotMessages.HELLO_MYTODO_BOT.getMessage());
 
-				ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-				List<KeyboardRow> keyboard = new ArrayList<>();
+                ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+                List<KeyboardRow> keyboard = new ArrayList<>();
 
-				// first row
-				KeyboardRow row = new KeyboardRow();
-				row.add(BotLabels.LIST_ALL_ITEMS.getLabel());
-				row.add(BotLabels.ADD_NEW_ITEM.getLabel());
-				// Add the first row to the keyboard
-				keyboard.add(row);
+                // Manager Option
+                KeyboardRow managerRow = new KeyboardRow();
+                managerRow.add(BotLabels.MANAGER.getLabel());
+                keyboard.add(managerRow);
 
-				// second row
-				row = new KeyboardRow();
-				row.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-				row.add(BotLabels.HIDE_MAIN_SCREEN.getLabel());
-				keyboard.add(row);
+                // Dev Option
+                KeyboardRow devRow = new KeyboardRow();
+                devRow.add(BotLabels.DEV.getLabel());
+                keyboard.add(devRow);
 
-				// Set the keyboard
-				keyboardMarkup.setKeyboard(keyboard);
+                keyboardMarkup.setKeyboard(keyboard);
+                messageToTelegram.setReplyMarkup(keyboardMarkup);
 
-				// Add the keyboard markup
-				messageToTelegram.setReplyMarkup(keyboardMarkup);
+                try {
+                    execute(messageToTelegram);
+                } catch (TelegramApiException e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
 
-				try {
-					execute(messageToTelegram);
-				} catch (TelegramApiException e) {
-					logger.error(e.getLocalizedMessage(), e);
-				}
+            } else if (messageTextFromTelegram.equals(BotLabels.MANAGER.getLabel())) {
+                // Options for Manager
+                SendMessage messageToTelegram = new SendMessage();
+                messageToTelegram.setChatId(chatId);
+                messageToTelegram.setText("Manager Options:");
 
+                ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+                List<KeyboardRow> keyboard = new ArrayList<>();
+
+                KeyboardRow row1 = new KeyboardRow();
+                row1.add(BotLabels.LIST_ALL_ITEMS.getLabel());
+                row1.add(BotLabels.ADD_NEW_ITEM.getLabel());
+                keyboard.add(row1);
+
+                KeyboardRow row2 = new KeyboardRow();
+                row2.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
+                row2.add(BotLabels.HIDE_MAIN_SCREEN.getLabel());
+                keyboard.add(row2);
+
+                keyboardMarkup.setKeyboard(keyboard);
+                messageToTelegram.setReplyMarkup(keyboardMarkup);
+
+                try {
+                    execute(messageToTelegram);
+                } catch (TelegramApiException e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
+
+			} else if (messageTextFromTelegram.equals(BotLabels.DEV.getLabel())) {
+                // Options for Manager
+                SendMessage messageToTelegram = new SendMessage();
+                messageToTelegram.setChatId(chatId);
+                messageToTelegram.setText("Manager Options:");
+
+                ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+                List<KeyboardRow> keyboard = new ArrayList<>();
+
+                KeyboardRow row1 = new KeyboardRow();
+                row1.add(BotLabels.LIST_ALL_ITEMS.getLabel());
+                keyboard.add(row1);
+
+                KeyboardRow row2 = new KeyboardRow();
+                row2.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
+                row2.add(BotLabels.HIDE_MAIN_SCREEN.getLabel());
+                keyboard.add(row2);
+
+                keyboardMarkup.setKeyboard(keyboard);
+                messageToTelegram.setReplyMarkup(keyboardMarkup);
+
+                try {
+                    execute(messageToTelegram);
+                } catch (TelegramApiException e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
+			
 			} else if (messageTextFromTelegram.indexOf(BotLabels.DONE.getLabel()) != -1) {
 
 				String done = messageTextFromTelegram.substring(0,
