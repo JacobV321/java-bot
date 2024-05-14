@@ -1,5 +1,5 @@
 package com.springboot.MyTodoList.controller;
-
+import com.springboot.MyTodoList.controller.UserAuthentication;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ import com.springboot.MyTodoList.util.BotHelper;
 import com.springboot.MyTodoList.util.BotLabels;
 import com.springboot.MyTodoList.util.BotMessages;
 
-public class ToDoItemBotController extends TelegramLongPollingBot {
+/* public class ToDoItemBotController extends TelegramLongPollingBot {
 
 	private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
 	private ToDoItemService toDoItemService;
@@ -282,8 +282,84 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			}
 		}}
 		
-	}
+	} */
 
+	public class ToDoItemBotController extends TelegramLongPollingBot {
+
+		private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
+		private ToDoItemService toDoItemService;
+		private String botName;
+		private UserAuthentication userAuthentication;
+	
+		public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService, UserAuthentication userAuthentication) {
+			super(botToken);
+			logger.info("Bot Token: " + botToken);
+			logger.info("Bot name: " + botName);
+			this.toDoItemService = toDoItemService;
+			this.botName = botName;
+			this.userAuthentication = userAuthentication;
+		}
+	
+		@Override
+		public void onUpdateReceived(Update update) {
+			if (update.hasMessage() && update.getMessage().hasText()) {
+				String messageTextFromTelegram = update.getMessage().getText();
+				long chatId = update.getMessage().getChatId();
+	
+				if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())) {
+					// Solo permitir el comando /login al iniciar el bot
+					SendMessage messageToTelegram = new SendMessage();
+					messageToTelegram.setChatId(chatId);
+					messageToTelegram.setText("Por favor, introduce /login para autenticarte.");
+					try {
+						execute(messageToTelegram);
+					} catch (TelegramApiException e) {
+						logger.error(e.getLocalizedMessage(), e);
+					}
+				} else if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
+					// Lógica de autenticación
+					String[] parts = messageTextFromTelegram.split(" ");
+					if (parts.length != 3) {
+						sendErrorMessage(chatId, "Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario_contraseña rol");
+						return;
+					}
+					String credentials = parts[1];
+					String role = parts[2];
+					String[] authenticationResult = userAuthentication.isAuthenticated(credentials, role);
+					if (authenticationResult[0].equals("true")) {
+						sendSuccessMessage(chatId, authenticationResult[1]);
+					} else {
+						sendErrorMessage(chatId, authenticationResult[1]);
+					}
+				} else {
+					// Usuario no ha iniciado sesión
+					sendErrorMessage(chatId, "Por favor, inicia sesión primero con /login");
+				}
+			}
+		}
+	
+		private void sendSuccessMessage(long chatId, String role) {
+			SendMessage messageToTelegram = new SendMessage();
+			messageToTelegram.setChatId(chatId);
+			messageToTelegram.setText("¡Autenticación exitosa! Ahora puedes acceder a las funcionalidades del bot como " + role);
+			try {
+				execute(messageToTelegram);
+			} catch (TelegramApiException e) {
+				logger.error(e.getLocalizedMessage(), e);
+			}
+		}
+	
+		private void sendErrorMessage(long chatId, String errorMessage) {
+			SendMessage messageToTelegram = new SendMessage();
+			messageToTelegram.setChatId(chatId);
+			messageToTelegram.setText(errorMessage);
+			try {
+				execute(messageToTelegram);
+			} catch (TelegramApiException e) {
+				logger.error(e.getLocalizedMessage(), e);
+			}
+		}
+	
 	@Override
 	public String getBotUsername() {		
 		return botName;
