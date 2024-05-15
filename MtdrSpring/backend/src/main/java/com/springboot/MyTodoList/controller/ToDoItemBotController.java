@@ -289,15 +289,15 @@ import com.springboot.MyTodoList.util.BotMessages;
 		private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
 		private ToDoItemService toDoItemService;
 		private String botName;
-		private UserAuthentication userAuthentication;
+		
 	
-		public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService, UserAuthentication userAuthentication) {
+		public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService) {
 			super(botToken);
 			logger.info("Bot Token: " + botToken);
 			logger.info("Bot name: " + botName);
 			this.toDoItemService = toDoItemService;
 			this.botName = botName;
-			this.userAuthentication = userAuthentication;
+
 		}
 	
 		@Override

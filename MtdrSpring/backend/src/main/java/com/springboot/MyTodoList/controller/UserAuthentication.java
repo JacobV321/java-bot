@@ -1,33 +1,30 @@
 
 package com.springboot.MyTodoList.controller;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserAuthentication {
     
     // Definir una estructura para almacenar las credenciales válidas
-    private Map<String, String> validCredentials;
+    private List<String[]> validCredentials;
 
     // Constructor para inicializar las credenciales válidas
     public UserAuthentication() {
-        validCredentials = new HashMap<>();
-        // Agregar credenciales válidas (usuario_contraseña)
-        validCredentials.put("devuser", "devpass");
-        validCredentials.put("adminuser", "adminpass");
+        validCredentials = new ArrayList<>();
+        // Agregar credenciales válidas (nombre, contraseña, rol)
+        validCredentials.add(new String[]{"devuser", "devpass", "Dev"});
+        validCredentials.add(new String[]{"adminuser", "adminpass", "Manager"});
     }
 
     // Método para verificar si las credenciales son válidas
-    public boolean isAuthenticated(String credentials) {
-        // Separar el usuario y la contraseña
-        String[] parts = credentials.split("_");
-        if (parts.length != 2) {
-            return false; // Formato incorrecto
-        }
-        String username = parts[0];
-        String password = parts[1];
-
+    public String[] isAuthenticated(String username, String password) {
         // Verificar las credenciales en la estructura de datos
-        return validCredentials.containsKey(username) && validCredentials.get(username).equals(password);
+        for (String[] credentials : validCredentials) {
+            if (credentials[0].equals(username) && credentials[1].equals(password)) {
+                return new String[]{"true", credentials[0], credentials[2]}; // Usuario autenticado correctamente
+            }
+        }
+        return new String[]{"false", "Credenciales inválidas. Por favor, inténtalo de nuevo."}; // Usuario no autenticado
     }
 }
