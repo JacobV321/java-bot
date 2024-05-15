@@ -289,15 +289,15 @@ import com.springboot.MyTodoList.util.BotMessages;
 		private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
 		private ToDoItemService toDoItemService;
 		private String botName;
-		
+		private UserAuthentication userAuthentication;
 	
-		public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService) {
+		public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService, UserAuthentication userAuthentication) {
 			super(botToken);
 			logger.info("Bot Token: " + botToken);
 			logger.info("Bot name: " + botName);
 			this.toDoItemService = toDoItemService;
 			this.botName = botName;
-
+			this.userAuthentication = userAuthentication;
 		}
 	
 		@Override
@@ -318,23 +318,26 @@ import com.springboot.MyTodoList.util.BotMessages;
 					}
 				} else if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
 					// Lógica de autenticación
-					String[] parts = messageTextFromTelegram.split(" ");
-					if (parts.length != 3) {
-						sendErrorMessage(chatId, "Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario_contraseña rol");
-						return;
-					}
-					String credentials = parts[1];
-					String role = parts[2];
-					String[] authenticationResult = userAuthentication.isAuthenticated(credentials, role);
-					if (authenticationResult[0].equals("true")) {
-						sendSuccessMessage(chatId, authenticationResult[1]);
-					} else {
-						sendErrorMessage(chatId, authenticationResult[1]);
-					}
+				String[] parts = messageTextFromTelegram.split(" ");
+                if (parts.length != 3) {
+                sendErrorMessage(chatId, "Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario_contraseña");
+                return;
+                }
+                String username = parts[1];
+                String password = parts[2];
+                String[] authenticationResult = userAuthentication.isAuthenticated(username, password);
+                if (authenticationResult[0].equals("true")) {
+                    String name = authenticationResult[1];
+                    String role = authenticationResult[2];
+                    sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
+                } else {
+                    sendErrorMessage(chatId, authenticationResult[1]);
+                }
 				} else {
 					// Usuario no ha iniciado sesión
 					sendErrorMessage(chatId, "Por favor, inicia sesión primero con /login");
 				}
+				
 			}
 		}
 	
