@@ -53,55 +53,61 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageTextFromTelegram = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-
+    
             if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
                 // Lógica de autenticación
-                String[] parts = messageTextFromTelegram.split("\\s+", 3); // Divide en al menos 3 partes, ignorando los espacios extras
+                String[] parts = messageTextFromTelegram.split("\\s+", 3);
                 if (parts.length != 3) {
                     sendErrorMessage(chatId, "Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario contraseña");
                     return;
                 }
                 String username = parts[1];
                 String password = parts[2];
-                String[] authenticationResult = userAuthentication.isAuthenticated(username, password);  // Usa la instancia de UserAuthentication
+                String[] authenticationResult = userAuthentication.isAuthenticated(username, password);
                 if (authenticationResult[0].equals("true")) {
+                    userSessions.put(chatId, true); // Marcar al usuario como autenticado
                     String name = authenticationResult[1];
                     String role = authenticationResult[2];
-                    userSessions.put(chatId, true);  // Marca al usuario como autenticado
                     sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
                 } else {
                     sendErrorMessage(chatId, authenticationResult[1]);
                 }
-                return;
-            }
-
-            // Verifica si el usuario ha iniciado sesión
-            if (!userSessions.containsKey(chatId) || !userSessions.get(chatId)) {
-                sendErrorMessage(chatId, "Debes iniciar sesión primero. Usa el comando /login usuario contraseña");
-                return;
-            }
-
-            if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
-                    || messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
-                handleStartCommand(chatId);
-            } else if (messageTextFromTelegram.contains(BotLabels.DONE.getLabel())) {
-                handleDoneCommand(chatId, messageTextFromTelegram);
-            } else if (messageTextFromTelegram.contains(BotLabels.UNDO.getLabel())) {
-                handleUndoCommand(chatId, messageTextFromTelegram);
-            } else if (messageTextFromTelegram.contains(BotLabels.DELETE.getLabel())) {
-                handleDeleteCommand(chatId, messageTextFromTelegram);
-            } else if (messageTextFromTelegram.equals(BotCommands.HIDE_COMMAND.getCommand())
-                    || messageTextFromTelegram.equals(BotLabels.HIDE_MAIN_SCREEN.getLabel())) {
-                BotHelper.sendMessageToTelegram(chatId, BotMessages.BYE.getMessage(), this);
-            } else if (messageTextFromTelegram.equals(BotCommands.TODO_LIST.getCommand())
-                    || messageTextFromTelegram.equals(BotLabels.LIST_ALL_ITEMS.getLabel())
-                    || messageTextFromTelegram.equals(BotLabels.MY_TODO_LIST.getLabel())) {
-                handleListAllItemsCommand(chatId);
-            } else if (messageTextFromTelegram.equals(BotCommands.ADD_ITEM.getCommand())
-                    || messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
-                handleAddNewItemCommand(chatId);
+            } else if (messageTextFromTelegram.equals(BotCommands.LOG_OUT.getCommand())) {
+                // Lógica de cierre de sesión
+                userSessions.remove(chatId); // Eliminar la sesión del usuario
+                sendSuccessMessage(chatId, "¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
             } else {
-                handleAddToDoItem(chatId, messageTextFromTelegram);
+                // Verificar si el usuario ha iniciado sesión antes de permitir el acceso a otros comandos
+                Boolean isLoggedIn = userSessions.getOrDefault(chatId, false);
+                if (!isLoggedIn) {
+                    sendErrorMessage(chatId, "Debes iniciar sesión primero usando /login.");
+                    return;
+                }
+    
+                // Manejar otros comandos
+
+                if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
+                        || messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
+                    handleStartCommand(chatId);
+                } else if (messageTextFromTelegram.contains(BotLabels.DONE.getLabel())) {
+                    handleDoneCommand(chatId, messageTextFromTelegram);
+                } else if (messageTextFromTelegram.contains(BotLabels.UNDO.getLabel())) {
+                    handleUndoCommand(chatId, messageTextFromTelegram);
+                } else if (messageTextFromTelegram.contains(BotLabels.DELETE.getLabel())) {
+                    handleDeleteCommand(chatId, messageTextFromTelegram);
+                } else if (messageTextFromTelegram.equals(BotCommands.HIDE_COMMAND.getCommand())
+                        || messageTextFromTelegram.equals(BotLabels.HIDE_MAIN_SCREEN.getLabel())) {
+                    BotHelper.sendMessageToTelegram(chatId, BotMessages.BYE.getMessage(), this);
+                } else if (messageTextFromTelegram.equals(BotCommands.TODO_LIST.getCommand())
+                        || messageTextFromTelegram.equals(BotLabels.LIST_ALL_ITEMS.getLabel())
+                        || messageTextFromTelegram.equals(BotLabels.MY_TODO_LIST.getLabel())) {
+                    handleListAllItemsCommand(chatId);
+                } else if (messageTextFromTelegram.equals(BotCommands.ADD_ITEM.getCommand())
+                        || messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
+                    handleAddNewItemCommand(chatId);
+                } else {
+                    handleAddToDoItem(chatId, messageTextFromTelegram);
+                }
             }
         }
     }
