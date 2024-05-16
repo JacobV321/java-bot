@@ -21,6 +21,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import com.springboot.MyTodoList.model.ToDoItem;
+import com.springboot.MyTodoList.model.Roles;
+import com.springboot.MyTodoList.model.Usuario;
+
 import com.springboot.MyTodoList.service.ToDoItemService;
 import com.springboot.MyTodoList.util.BotCommands;
 import com.springboot.MyTodoList.util.BotHelper;
@@ -318,22 +321,23 @@ import com.springboot.MyTodoList.util.BotMessages;
 					}
 				} else if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
 					// Lógica de autenticación
-				String[] parts = messageTextFromTelegram.split(" ");
-                if (parts.length != 3) {
-                sendErrorMessage(chatId, "Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario_contraseña");
-                return;
-                }
-                String username = parts[1];
-                String password = parts[2];
-                String[] authenticationResult = userAuthentication.isAuthenticated(username, password);
-                if (authenticationResult[0].equals("true")) {
-                    String name = authenticationResult[1];
-                    String role = authenticationResult[2];
-                    sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
-                } else {
-                    sendErrorMessage(chatId, authenticationResult[1]);
-                }
-				} else {
+					String[] parts = messageTextFromTelegram.split("\\s+", 3); // Divide en al menos 3 partes, ignorando los espacios extras
+					if (parts.length != 3) {
+						sendErrorMessage(chatId, "Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario contraseña");
+						return;
+					}
+					String username = parts[1];
+					String password = parts[2];
+					String[] authenticationResult = userAuthentication.isAuthenticated(username, password);
+					if (authenticationResult[0].equals("true")) {
+						String name = authenticationResult[1];
+						String role = authenticationResult[2];
+						sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
+					} else {
+						sendErrorMessage(chatId, authenticationResult[1]);
+					}
+				}
+				 else {
 					// Usuario no ha iniciado sesión
 					sendErrorMessage(chatId, "Por favor, inicia sesión primero con /login");
 				}
@@ -341,25 +345,25 @@ import com.springboot.MyTodoList.util.BotMessages;
 			}
 		}
 	
-		private void sendSuccessMessage(long chatId, String role) {
-			SendMessage messageToTelegram = new SendMessage();
-			messageToTelegram.setChatId(chatId);
-			messageToTelegram.setText("¡Autenticación exitosa! Ahora puedes acceder a las funcionalidades del bot como " + role);
+		private void sendSuccessMessage(Long chatId, String text) {
+			SendMessage message = new SendMessage();
+			message.setChatId(chatId);
+			message.setText(text);
 			try {
-				execute(messageToTelegram);
+				execute(message);
 			} catch (TelegramApiException e) {
-				logger.error(e.getLocalizedMessage(), e);
+				e.printStackTrace();
 			}
 		}
-	
-		private void sendErrorMessage(long chatId, String errorMessage) {
-			SendMessage messageToTelegram = new SendMessage();
-			messageToTelegram.setChatId(chatId);
-			messageToTelegram.setText(errorMessage);
+		
+		private void sendErrorMessage(Long chatId, String text) {
+			SendMessage message = new SendMessage();
+			message.setChatId(chatId);
+			message.setText(text);
 			try {
-				execute(messageToTelegram);
+				execute(message);
 			} catch (TelegramApiException e) {
-				logger.error(e.getLocalizedMessage(), e);
+				e.printStackTrace();
 			}
 		}
 	
