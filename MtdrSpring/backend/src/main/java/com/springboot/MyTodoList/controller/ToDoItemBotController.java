@@ -76,7 +76,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					String role = authenticationResult[2];
 					status = authenticationResult[2];
 					sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
-					handleUserCommands(chatId, messageTextFromTelegram, role);
 				} else {
 					sendErrorMessage(chatId, authenticationResult[1]);
 				}
