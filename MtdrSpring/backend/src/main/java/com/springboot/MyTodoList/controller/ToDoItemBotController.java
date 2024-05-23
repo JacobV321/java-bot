@@ -3,7 +3,9 @@ package com.springboot.MyTodoList.controller;
 import com.springboot.MyTodoList.controller.UserAuthentication;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -37,6 +39,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	private ToDoItemService toDoItemService;
 	private String botName;
 	private UserAuthentication userAuthentication;
+
+	private Map<Long, Boolean> authenticatedUsers = new HashMap<>();
 
 	public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService,
 			UserAuthentication userAuthentication) {
@@ -77,6 +81,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				String password = parts[2];
 				String[] authenticationResult = userAuthentication.isAuthenticated(username, password);
 				if (authenticationResult[0].equals("true")) {
+					authenticatedUsers.put(chatId, true);
 					String name = authenticationResult[1];
 					String role = authenticationResult[2];
 					sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
@@ -84,9 +89,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				} else {
 					sendErrorMessage(chatId, authenticationResult[1]);
 				}
-			} else {
-				// Usuario no ha iniciado sesión
+			}
+			if (!authenticatedUsers.getOrDefault(chatId, false)) {
+				// Usuario no autenticado, enviar mensaje de inicio de sesión
 				sendErrorMessage(chatId, "Por favor, inicia sesión primero con /login");
+				return;
 			}
 
 		}
@@ -113,6 +120,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					|| messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
 				handleAddItemCommand(chatId);
 			} else if (messageTextFromTelegram.equals(BotLabels.LOG_OUT.getLabel())) {
+				authenticatedUsers.remove(chatId);
+
 				sendSuccessMessage(chatId,
 						"¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
 				return;
@@ -126,6 +135,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				sendErrorMessage(chatId, "Comando no reconocido para el rol admin.");
 			}
 		} else if (messageTextFromTelegram.equals(BotLabels.LOG_OUT.getLabel())) {
+			authenticatedUsers.remove(chatId);
+
 			sendSuccessMessage(chatId,
 					"¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
 			return;
