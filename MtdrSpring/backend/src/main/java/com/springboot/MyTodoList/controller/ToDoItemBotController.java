@@ -44,6 +44,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	private Map<Long, Integer> authenticatedUserIds = new HashMap<>(); // Nuevo mapa para almacenar ID de usuarios autenticados
 
 	private String status;
+	private int userID;
 
 	public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService,
 			UserAuthentication userAuthentication) {
@@ -78,6 +79,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					String name = authenticationResult[1];
 					String role = authenticationResult[2];
 					status = authenticationResult[2];
+					userID = Integer.parseInt(authenticationResult[3]);
 					sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
 				} else {
 					sendErrorMessage(chatId, authenticationResult[1]);
@@ -85,6 +87,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			} else if (messageTextFromTelegram.equals(BotCommands.LOG_OUT.getCommand())) {
 				// Lógica de cierre de sesión
 				authenticatedUsers.remove(chatId); // Eliminar al usuario autenticado
+				authenticatedUserIds.remove(chatId); // Eliminar el ID del usuario autenticado
+
 				sendSuccessMessage(chatId,
 						"¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
 			} else {
@@ -125,7 +129,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					|| messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
 				handleAddItemCommand(chatId);
 			} else {
-				handleNewItem(chatId, messageTextFromTelegram);
+				handleNewItem(chatId, userID, messageTextFromTelegram);
 			}
 		} else if (role.equals("admin")) {
 			// Lógica para el rol de administrador
@@ -341,9 +345,10 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		}
 	}
 
-	public void handleNewItem(long chatId, String messageTextFromTelegram) {
+	public void handleNewItem(long chatId, int userID, String messageTextFromTelegram) {
 		try {
 			ToDoItem newItem = new ToDoItem();
+			newItem.setIdUsuario(userID);
 			newItem.setDescription(messageTextFromTelegram);
 			newItem.setCreation_ts(OffsetDateTime.now());
 			newItem.setDone(false);
