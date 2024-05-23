@@ -41,6 +41,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	private UserAuthentication userAuthentication;
 
 	private Map<Long, Boolean> authenticatedUsers = new HashMap<>();
+	private String status;
 
 	public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService,
 			UserAuthentication userAuthentication) {
@@ -58,22 +59,9 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			String messageTextFromTelegram = update.getMessage().getText();
 			long chatId = update.getMessage().getChatId();
 
-			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
-					&& authenticatedUsers.getOrDefault(chatId, false)) {
-				// Solo permitir el comando /login al iniciar el bot
-				SendMessage messageToTelegram = new SendMessage();
-				messageToTelegram.setChatId(chatId);
-				messageToTelegram.setText("Por favor, introduce /login para autenticarte.");
-				try {
-					execute(messageToTelegram);
-				} catch (TelegramApiException e) {
-					logger.error(e.getLocalizedMessage(), e);
-				}
-			} else if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())
-					&& authenticatedUsers.getOrDefault(chatId, false) == false) {
+			if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
 				// Lógica de autenticación
-				String[] parts = messageTextFromTelegram.split("\\s+", 3); // Divide en al menos 3 partes, ignorando los
-																			// espacios extras
+				String[] parts = messageTextFromTelegram.split("\\s+", 3);
 				if (parts.length != 3) {
 					sendErrorMessage(chatId,
 							"Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario contraseña");
@@ -86,23 +74,35 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					authenticatedUsers.put(chatId, true);
 					String name = authenticationResult[1];
 					String role = authenticationResult[2];
+					status = authenticationResult[2];
 					sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
 					handleUserCommands(chatId, messageTextFromTelegram, role);
 				} else {
 					sendErrorMessage(chatId, authenticationResult[1]);
 				}
-			}
-			if (authenticatedUsers.getOrDefault(chatId, false)) {
-				// Usuario no autenticado, enviar mensaje de inicio de sesión
-				sendErrorMessage(chatId, "Por favor, inicia sesión primero con /login");
-				return;
-			}
+			} else if (messageTextFromTelegram.equals(BotCommands.LOG_OUT.getCommand())) {
+				// Lógica de cierre de sesión
+				authenticatedUsers.remove(chatId); // Eliminar al usuario autenticado
+				sendSuccessMessage(chatId,
+						"¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
+			} else {
+				// Verificar si el usuario ha iniciado sesión antes de permitir el acceso a
+				// otros comandos
+				Boolean isLoggedIn = authenticatedUsers.get(chatId);
+				if (isLoggedIn == false) {
+					sendErrorMessage(chatId, "Debes iniciar sesión primero usando /login.");
+					return;
+				}
 
+				// Manejar otros comandos según el rol del usuario
+				handleUserCommands(chatId, messageTextFromTelegram, status);
+			}
 		}
 	}
 
 	private void handleUserCommands(long chatId, String messageTextFromTelegram, String role) {
 		if (role.equals("dev")) {
+			// Lógica para el rol de desarrollador
 			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())) {
 				handleStartCommand(chatId);
 			} else if (messageTextFromTelegram.contains(BotLabels.DONE.getLabel())) {
@@ -121,28 +121,18 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			} else if (messageTextFromTelegram.equals(BotCommands.ADD_ITEM.getCommand())
 					|| messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
 				handleAddItemCommand(chatId);
-			} else if (messageTextFromTelegram.equals(BotLabels.LOG_OUT.getLabel())) {
-				authenticatedUsers.remove(chatId);
-
-				sendSuccessMessage(chatId,
-						"¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
-				return;
 			} else {
 				handleNewItem(chatId, messageTextFromTelegram);
 			}
 		} else if (role.equals("admin")) {
+			// Lógica para el rol de administrador
 			if (messageTextFromTelegram.equals(BotLabels.TEAM_LIST.getLabel())) {
 				handleTeamListCommand(chatId);
 			} else {
 				sendErrorMessage(chatId, "Comando no reconocido para el rol admin.");
 			}
-		} else if (messageTextFromTelegram.equals(BotLabels.LOG_OUT.getLabel())) {
-			authenticatedUsers.remove(chatId);
-
-			sendSuccessMessage(chatId,
-					"¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
-			return;
 		} else {
+			// Otros roles aquí
 			sendErrorMessage(chatId, "Rol no reconocido.");
 		}
 	}
