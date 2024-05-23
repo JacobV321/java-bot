@@ -41,6 +41,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	private UserAuthentication userAuthentication;
 
 	private Map<Long, Boolean> authenticatedUsers = new HashMap<>();
+	private Map<Long, Integer> authenticatedUserIds = new HashMap<>(); // Nuevo mapa para almacenar ID de usuarios autenticados
+
 	private String status;
 
 	public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService,
@@ -72,6 +74,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				String[] authenticationResult = userAuthentication.isAuthenticated(username, password);
 				if (authenticationResult[0].equals("true")) {
 					authenticatedUsers.put(chatId, true);
+					authenticatedUserIds.put(chatId, Integer.parseInt(authenticationResult[3])); // Almacenar ID del usuario autenticado
 					String name = authenticationResult[1];
 					String role = authenticationResult[2];
 					status = authenticationResult[2];
@@ -102,7 +105,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	private void handleUserCommands(long chatId, String messageTextFromTelegram, String role) {
 		if (role.equals("dev")) {
 			// Lógica para el rol de desarrollador
-			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())) {
+			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
+					|| messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
 				handleStartCommand(chatId);
 			} else if (messageTextFromTelegram.contains(BotLabels.DONE.getLabel())) {
 				handleDoneCommand(chatId, messageTextFromTelegram);
