@@ -38,6 +38,9 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
     private UserAuthentication userAuthentication;
 
     private Map<Long, Boolean> userSessions = new HashMap<>();
+    private Map<Long, Integer> authenticatedUserIds = new HashMap<>(); // Nuevo mapa para almacenar ID de usuarios autenticados
+
+    private int userID;
 
     public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService, UserAuthentication userAuthentication) {
         super(botToken);
@@ -66,8 +69,10 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                 String[] authenticationResult = userAuthentication.isAuthenticated(username, password);
                 if (authenticationResult[0].equals("true")) {
                     userSessions.put(chatId, true); // Marcar al usuario como autenticado
+                    authenticatedUserIds.put(chatId, Integer.parseInt(authenticationResult[3])); // Almacenar ID del usuario autenticado
                     String name = authenticationResult[1];
                     String role = authenticationResult[2];
+                    userID = Integer.parseInt(authenticationResult[3]);
                     sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
                 } else {
                     sendErrorMessage(chatId, authenticationResult[1]);
@@ -106,7 +111,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                         || messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
                     handleAddNewItemCommand(chatId);
                 } else {
-                    handleAddToDoItem(chatId, messageTextFromTelegram);
+                    handleAddToDoItem(chatId, userID, messageTextFromTelegram);
                 }
             }
         }
@@ -261,23 +266,24 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
         }
     }
 
-    private void handleAddToDoItem(long chatId, String messageTextFromTelegram) {
-        try {
-            ToDoItem newItem = new ToDoItem();
-            newItem.setDescription(messageTextFromTelegram);
-            newItem.setCreation_ts(OffsetDateTime.now());
-            newItem.setDone(false);
-            ResponseEntity entity = addToDoItem(newItem);
+    public void handleNewItem(long chatId, int userID, String messageTextFromTelegram) {
+		try {
+			ToDoItem newItem = new ToDoItem();
+			newItem.setIdUsuario(userID);
+			newItem.setDescription(messageTextFromTelegram);
+			newItem.setCreation_ts(OffsetDateTime.now());
+			newItem.setDone(false);
+			addToDoItem(newItem);
 
-            SendMessage messageToTelegram = new SendMessage();
-            messageToTelegram.setChatId(chatId);
-            messageToTelegram.setText(BotMessages.NEW_ITEM_ADDED.getMessage());
+			SendMessage messageToTelegram = new SendMessage();
+			messageToTelegram.setChatId(chatId);
+			messageToTelegram.setText(BotMessages.NEW_ITEM_ADDED.getMessage());
 
-            execute(messageToTelegram);
-        } catch (Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
-    }
+			execute(messageToTelegram);
+		} catch (Exception e) {
+			logger.error(e.getLocalizedMessage(), e);
+		}
+	}
 
     @Override
     public String getBotUsername() {

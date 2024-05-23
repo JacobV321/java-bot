@@ -14,6 +14,8 @@ public class ToDoItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int ID;
+    @Column(name = "ID_USUARIO")
+    int idUsuario; // Nuevo campo para almacenar el ID del usuario
     @Column(name = "DESCRIPTION")
     String description;
     @Column(name = "CREATION_TS")
@@ -23,8 +25,9 @@ public class ToDoItem {
     public ToDoItem(){
 
     }
-    public ToDoItem(int ID, String description, OffsetDateTime creation_ts, boolean done) {
+    public ToDoItem(int ID, int idUsuario, String description, OffsetDateTime creation_ts, boolean done) {
         this.ID = ID;
+        this.idUsuario = idUsuario; // Inicializar el campo idUsuario
         this.description = description;
         this.creation_ts = creation_ts;
         this.done = done;
@@ -36,6 +39,14 @@ public class ToDoItem {
 
     public void setID(int ID) {
         this.ID = ID;
+    }
+
+    public int getIdUsuario() {
+        return idUsuario; // Getter para idUsuario
+    }
+
+    public void setIdUsuario(int idUsuario) {
+        this.idUsuario = idUsuario; // Setter para idUsuario
     }
 
     public String getDescription() {
@@ -66,6 +77,7 @@ public class ToDoItem {
     public String toString() {
         return "ToDoItem{" +
                 "ID=" + ID +
+                ", idUsuario=" + idUsuario +
                 ", description='" + description + '\'' +
                 ", creation_ts=" + creation_ts +
                 ", done=" + done +
