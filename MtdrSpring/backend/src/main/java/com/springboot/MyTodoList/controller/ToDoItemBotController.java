@@ -111,7 +111,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
                         || messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
                     handleAddNewItemCommand(chatId);
                 } else {
-                    handleAddToDoItem(chatId, userID, messageTextFromTelegram);
+                    handleNewItem(chatId, userID, messageTextFromTelegram);
                 }
             }
         }
