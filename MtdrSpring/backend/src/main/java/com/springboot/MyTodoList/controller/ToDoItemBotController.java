@@ -58,7 +58,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			String messageTextFromTelegram = update.getMessage().getText();
 			long chatId = update.getMessage().getChatId();
 
-			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())) {
+			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
+					&& authenticatedUsers.getOrDefault(chatId, false)) {
 				// Solo permitir el comando /login al iniciar el bot
 				SendMessage messageToTelegram = new SendMessage();
 				messageToTelegram.setChatId(chatId);
@@ -68,7 +69,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				} catch (TelegramApiException e) {
 					logger.error(e.getLocalizedMessage(), e);
 				}
-			} else if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
+			} else if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())
+					&& authenticatedUsers.getOrDefault(chatId, false) == false) {
 				// Lógica de autenticación
 				String[] parts = messageTextFromTelegram.split("\\s+", 3); // Divide en al menos 3 partes, ignorando los
 																			// espacios extras
@@ -90,7 +92,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					sendErrorMessage(chatId, authenticationResult[1]);
 				}
 			}
-			if (!authenticatedUsers.getOrDefault(chatId, false)) {
+			if (authenticatedUsers.getOrDefault(chatId, false)) {
 				// Usuario no autenticado, enviar mensaje de inicio de sesión
 				sendErrorMessage(chatId, "Por favor, inicia sesión primero con /login");
 				return;
