@@ -101,12 +101,12 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				}
 
 				// Manejar otros comandos según el rol del usuario
-				handleUserCommands(chatId, messageTextFromTelegram, status);
+				handleUserCommands(chatId, messageTextFromTelegram, status, userID);
 			}
 		}
 	}
 
-	private void handleUserCommands(long chatId, String messageTextFromTelegram, String role) {
+	private void handleUserCommands(long chatId, String messageTextFromTelegram, String role, int userID) {
 		if (role.equals("dev")) {
 			// Lógica para el rol de desarrollador
 			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
