@@ -88,7 +88,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				// Verificar si el usuario ha iniciado sesión antes de permitir el acceso a
 				// otros comandos
 				Boolean isLoggedIn = authenticatedUsers.get(chatId);
-				if (isLoggedIn == false) {
+				if (!isLoggedIn) {
 					sendErrorMessage(chatId, "Debes iniciar sesión primero usando /login.");
 					return;
 				}
