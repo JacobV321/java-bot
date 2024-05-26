@@ -99,7 +99,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				} else {
 					sendErrorMessage(chatId, authenticationResult[1]);
 				}
-			} else if (messageTextFromTelegram.equals(BotCommands.LOG_OUT.getCommand())) {
+			} else if (messageTextFromTelegram.equals(BotCommands.LOG_OUT.getCommand())
+				|| messageTextFromTelegram.equals(BotLabels.LOG_OUT.getLabel())) {
 				// Lógica de cierre de sesión
 				authenticatedUsers.remove(chatId); // Eliminar al usuario autenticado
 				authenticatedUserIds.remove(chatId); // Eliminar el ID del usuario autenticado
@@ -181,7 +182,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			logger.error(e.getLocalizedMessage(), e);
 		}
 	}
-
 	public void handleManagerCommand(long chatId) {
 		SendMessage messageToTelegram = new SendMessage();
 		messageToTelegram.setChatId(chatId);
