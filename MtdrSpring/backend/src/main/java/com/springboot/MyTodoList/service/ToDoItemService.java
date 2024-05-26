@@ -20,8 +20,8 @@ public class ToDoItemService {
         return todoItems;
     }
     // Nuevo método para obtener tareas por ID de usuario
-    public List<ToDoItem> findAllByUserId(int idUsuario) {
-        return toDoItemRepository.findAllByUserId(idUsuario);
+    public List<ToDoItem> findAllByidUsuario(int idUsuario) {
+        return toDoItemRepository.findAllByidUsuario(idUsuario);
     }
     public ResponseEntity<ToDoItem> getItemById(int id){
         Optional<ToDoItem> todoData = toDoItemRepository.findById(id);

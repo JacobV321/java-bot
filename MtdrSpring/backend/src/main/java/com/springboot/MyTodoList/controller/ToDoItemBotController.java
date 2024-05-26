@@ -305,7 +305,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	}
 
 	public void handleToDoListCommand(long chatId, int userID) {
-		List<ToDoItem> allItems = getAllToDoItemsByUserId(userID);
+		List<ToDoItem> allItems = getAllToDoItemsByidUsuario(userID);
 		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
 		List<KeyboardRow> keyboard = new ArrayList<>();
 
@@ -424,8 +424,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	}
 
 	// Nuevo método para obtener tareas por ID de usuario
-	public List<ToDoItem> getAllToDoItemsByUserId(int userID) {
-		return toDoItemService.findAllByUserId(userID);
+	public List<ToDoItem> getAllToDoItemsByidUsuario(int userID) {
+		return toDoItemService.findAllByidUsuario(userID);
 	}
 
 	// GET BY ID /todolist/{id}

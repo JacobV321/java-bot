@@ -14,5 +14,5 @@ import java.util.List;
 public interface ToDoItemRepository extends JpaRepository<ToDoItem, Integer> {
 
     // Método para obtener todas las tareas por ID de usuario
-    List<ToDoItem> findAllByUserId(int idUsuario);
+    List<ToDoItem> findAllByidUsuario(int idUsuario);
 }
