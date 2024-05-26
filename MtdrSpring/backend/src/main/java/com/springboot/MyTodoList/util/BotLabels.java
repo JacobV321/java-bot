@@ -12,7 +12,7 @@ public enum BotLabels {
 	MY_TODO_LIST("MY TODO LIST"),
 	DASH("-"),
 	TEAM_LIST("TEAM LIST"),
-	LOG_OUT("LOG_OUT");
+	LOG_OUT("LOG OUT");
 
 	private String label;
 

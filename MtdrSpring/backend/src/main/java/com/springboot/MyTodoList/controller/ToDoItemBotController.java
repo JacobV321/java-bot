@@ -62,6 +62,17 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			String messageTextFromTelegram = update.getMessage().getText();
 			long chatId = update.getMessage().getChatId();
 
+			// Verificar si el usuario está autenticado antes de manejar cualquier comando
+			Boolean isLoggedIn = authenticatedUsers.get(chatId);
+			if (isLoggedIn == null || !isLoggedIn) {
+				// Si el usuario no está autenticado y el comando no es /login, enviar mensaje de error
+				if (!messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
+					sendErrorMessage(chatId, "Haz el /login primero");
+					return;
+				}
+			}
+	
+			// Procesar comando de login por separado
 			if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
 				// Lógica de autenticación
 				String[] parts = messageTextFromTelegram.split("\\s+", 3);
@@ -96,13 +107,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				sendSuccessMessage(chatId,
 						"¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
 			} else {
-				// Verificar si el usuario ha iniciado sesión antes de permitir el acceso a otros comandos
-				Boolean isLoggedIn = authenticatedUsers.get(chatId);
-				if (!isLoggedIn) {
-					sendErrorMessage(chatId, "Debes iniciar sesión primero usando /login.");
-					return;
-				}
-
 				// Manejar otros comandos según el rol del usuario
 				handleUserCommands(chatId, messageTextFromTelegram, status, userID);
 			}
@@ -127,7 +131,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			} else if (messageTextFromTelegram.equals(BotCommands.TODO_LIST.getCommand())
 					|| messageTextFromTelegram.equals(BotLabels.LIST_ALL_ITEMS.getLabel())
 					|| messageTextFromTelegram.equals(BotLabels.MY_TODO_LIST.getLabel())) {
-				handleToDoListCommand(chatId);
+				handleToDoListCommand(chatId, userID);
 			} else if (messageTextFromTelegram.equals(BotCommands.ADD_ITEM.getCommand())
 					|| messageTextFromTelegram.equals(BotLabels.ADD_NEW_ITEM.getLabel())) {
 				handleAddItemCommand(chatId);
@@ -300,8 +304,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		BotHelper.sendMessageToTelegram(chatId, BotMessages.BYE.getMessage(), this);
 	}
 
-	public void handleToDoListCommand(long chatId) {
-		List<ToDoItem> allItems = getAllToDoItems();
+	public void handleToDoListCommand(long chatId, int userID) {
+		List<ToDoItem> allItems = getAllToDoItemsByUserId(userID);
 		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
 		List<KeyboardRow> keyboard = new ArrayList<>();
 
@@ -417,6 +421,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	// GET /todolist
 	public List<ToDoItem> getAllToDoItems() {
 		return toDoItemService.findAll();
+	}
+
+	// Nuevo método para obtener tareas por ID de usuario
+	public List<ToDoItem> getAllToDoItemsByUserId(int userID) {
+		return toDoItemService.findAllByUserId(userID);
 	}
 
 	// GET BY ID /todolist/{id}
