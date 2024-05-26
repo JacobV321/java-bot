@@ -81,6 +81,10 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					status = authenticationResult[2];
 					userID = Integer.parseInt(authenticationResult[3]);
 					sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
+
+					// Mostrar el teclado principal después del login exitoso
+					handleStartCommand(chatId);
+
 				} else {
 					sendErrorMessage(chatId, authenticationResult[1]);
 				}
@@ -92,8 +96,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				sendSuccessMessage(chatId,
 						"¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
 			} else {
-				// Verificar si el usuario ha iniciado sesión antes de permitir el acceso a
-				// otros comandos
+				// Verificar si el usuario ha iniciado sesión antes de permitir el acceso a otros comandos
 				Boolean isLoggedIn = authenticatedUsers.get(chatId);
 				if (!isLoggedIn) {
 					sendErrorMessage(chatId, "Debes iniciar sesión primero usando /login.");
@@ -199,6 +202,43 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			execute(messageToTelegram);
 		} catch (TelegramApiException e) {
 			logger.error(e.getLocalizedMessage(), e);
+			sendErrorMessage(chatId, "Error al mostrar opciones de manager: " + e.getLocalizedMessage());
+		}
+	}
+
+	private void handleStartCommand(long chatId) {
+		SendMessage messageToTelegram = new SendMessage();
+		messageToTelegram.setChatId(chatId);
+		messageToTelegram.setText("¡Bienvenido! Selecciona una opción:");
+
+		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+		List<KeyboardRow> keyboard = new ArrayList<>();
+
+		KeyboardRow row1 = new KeyboardRow();
+		row1.add(BotLabels.LIST_ALL_ITEMS.getLabel());
+		keyboard.add(row1);
+
+		KeyboardRow row2 = new KeyboardRow();
+		row2.add(BotLabels.ADD_NEW_ITEM.getLabel());
+		keyboard.add(row2);
+
+		KeyboardRow row3 = new KeyboardRow();
+		row3.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
+		row3.add(BotLabels.HIDE_MAIN_SCREEN.getLabel());
+		keyboard.add(row3);
+
+		KeyboardRow row4 = new KeyboardRow();
+		row4.add(BotLabels.LOG_OUT.getLabel());
+		keyboard.add(row4);
+
+		keyboardMarkup.setKeyboard(keyboard);
+		messageToTelegram.setReplyMarkup(keyboardMarkup);
+
+		try {
+			execute(messageToTelegram);
+		} catch (TelegramApiException e) {
+			logger.error(e.getLocalizedMessage(), e);
+			sendErrorMessage(chatId, "Error al mostrar el menú principal: " + e.getLocalizedMessage());
 		}
 	}
 
@@ -214,23 +254,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		}
 	}
 
-	public void handleStartCommand(long chatId) {
-		SendMessage messageToTelegram = new SendMessage();
-		messageToTelegram.setChatId(chatId);
-		messageToTelegram.setText(BotMessages.HELLO_MYTODO_BOT.getMessage());
-
-		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-		List<KeyboardRow> keyboard = new ArrayList<>();
-
-		keyboardMarkup.setKeyboard(keyboard);
-		messageToTelegram.setReplyMarkup(keyboardMarkup);
-
-		try {
-			execute(messageToTelegram);
-		} catch (TelegramApiException e) {
-			logger.error(e.getLocalizedMessage(), e);
-		}
-	}
 
 	public void handleDoneCommand(long chatId, String messageTextFromTelegram) {
 		String done = messageTextFromTelegram.substring(0, messageTextFromTelegram.indexOf(BotLabels.DASH.getLabel()));
@@ -364,25 +387,25 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		}
 	}
 
-	private void sendSuccessMessage(Long chatId, String text) {
-		SendMessage message = new SendMessage();
-		message.setChatId(chatId);
-		message.setText(text);
+	private void sendSuccessMessage(long chatId, String messageText) {
+		SendMessage messageToTelegram = new SendMessage();
+		messageToTelegram.setChatId(chatId);
+		messageToTelegram.setText(messageText);
 		try {
-			execute(message);
+			execute(messageToTelegram);
 		} catch (TelegramApiException e) {
-			e.printStackTrace();
+			logger.error(e.getLocalizedMessage(), e);
 		}
 	}
 
-	private void sendErrorMessage(Long chatId, String text) {
-		SendMessage message = new SendMessage();
-		message.setChatId(chatId);
-		message.setText(text);
+	private void sendErrorMessage(long chatId, String messageText) {
+		SendMessage messageToTelegram = new SendMessage();
+		messageToTelegram.setChatId(chatId);
+		messageToTelegram.setText("Error: " + messageText);
 		try {
-			execute(message);
+			execute(messageToTelegram);
 		} catch (TelegramApiException e) {
-			e.printStackTrace();
+			logger.error(e.getLocalizedMessage(), e);
 		}
 	}
 
