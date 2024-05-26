@@ -94,7 +94,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
 
 					// Mostrar el teclado principal después del login exitoso
-					handleStartCommand(chatId);
+					handleStartCommand(chatId, role);
 
 				} else {
 					sendErrorMessage(chatId, authenticationResult[1]);
@@ -119,7 +119,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			// Lógica para el rol de desarrollador
 			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
 					|| messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
-				handleStartCommand(chatId);
+				handleStartCommand(chatId, role);
 			} else if (messageTextFromTelegram.contains(BotLabels.DONE.getLabel())) {
 				handleDoneCommand(chatId, messageTextFromTelegram);
 			} else if (messageTextFromTelegram.contains(BotLabels.UNDO.getLabel())) {
@@ -151,7 +151,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			sendErrorMessage(chatId, "Rol no reconocido.");
 		}
 	}
-
+/* 
 	public void handleDevCommand(long chatId) {
 		SendMessage messageToTelegram = new SendMessage();
 		messageToTelegram.setChatId(chatId);
@@ -170,7 +170,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		keyboard.add(row2);
 
 		KeyboardRow row3 = new KeyboardRow();
-		row2.add(BotLabels.LOG_OUT.getLabel());
+		row3.add(BotLabels.LOG_OUT.getLabel());
 		keyboard.add(row3);
 
 		keyboardMarkup.setKeyboard(keyboard);
@@ -209,40 +209,72 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			sendErrorMessage(chatId, "Error al mostrar opciones de manager: " + e.getLocalizedMessage());
 		}
 	}
+*/
+	private void handleStartCommand(long chatId, String role) {
+		if (role.equals("dev")) {
+			// Lógica para el rol de desarrollador
+			SendMessage messageToTelegram = new SendMessage();
+			messageToTelegram.setChatId(chatId);
+			messageToTelegram.setText("¡Bienvenido! Selecciona una opción:");
 
-	private void handleStartCommand(long chatId) {
-		SendMessage messageToTelegram = new SendMessage();
-		messageToTelegram.setChatId(chatId);
-		messageToTelegram.setText("¡Bienvenido! Selecciona una opción:");
+			ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+			List<KeyboardRow> keyboard = new ArrayList<>();
 
-		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-		List<KeyboardRow> keyboard = new ArrayList<>();
+			KeyboardRow row1 = new KeyboardRow();
+			row1.add(BotLabels.LIST_ALL_ITEMS.getLabel());
+			keyboard.add(row1);
 
-		KeyboardRow row1 = new KeyboardRow();
-		row1.add(BotLabels.LIST_ALL_ITEMS.getLabel());
-		keyboard.add(row1);
+			KeyboardRow row2 = new KeyboardRow();
+			row2.add(BotLabels.ADD_NEW_ITEM.getLabel());
+			keyboard.add(row2);
 
-		KeyboardRow row2 = new KeyboardRow();
-		row2.add(BotLabels.ADD_NEW_ITEM.getLabel());
-		keyboard.add(row2);
+			KeyboardRow row3 = new KeyboardRow();
+			row3.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
+			row3.add(BotLabels.HIDE_MAIN_SCREEN.getLabel());
+			keyboard.add(row3);
 
-		KeyboardRow row3 = new KeyboardRow();
-		row3.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-		row3.add(BotLabels.HIDE_MAIN_SCREEN.getLabel());
-		keyboard.add(row3);
+			KeyboardRow row4 = new KeyboardRow();
+			row4.add(BotLabels.LOG_OUT.getLabel());
+			keyboard.add(row4);
 
-		KeyboardRow row4 = new KeyboardRow();
-		row4.add(BotLabels.LOG_OUT.getLabel());
-		keyboard.add(row4);
+			keyboardMarkup.setKeyboard(keyboard);
+			messageToTelegram.setReplyMarkup(keyboardMarkup);
 
-		keyboardMarkup.setKeyboard(keyboard);
-		messageToTelegram.setReplyMarkup(keyboardMarkup);
+			try {
+				execute(messageToTelegram);
+			} catch (TelegramApiException e) {
+				logger.error(e.getLocalizedMessage(), e);
+				sendErrorMessage(chatId, "Error al mostrar el menú principal: " + e.getLocalizedMessage());
+			}
+		} else if (role.equals("admin")) {
+			SendMessage messageToTelegram = new SendMessage();
+			messageToTelegram.setChatId(chatId);
+			messageToTelegram.setText("Opciones de Manager:");
 
-		try {
-			execute(messageToTelegram);
-		} catch (TelegramApiException e) {
-			logger.error(e.getLocalizedMessage(), e);
-			sendErrorMessage(chatId, "Error al mostrar el menú principal: " + e.getLocalizedMessage());
+			ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+			List<KeyboardRow> keyboard = new ArrayList<>();
+
+			// Añadir el botón para TEAM_LIST
+			KeyboardRow row1 = new KeyboardRow();
+			row1.add(BotLabels.TEAM_LIST.getLabel());
+			keyboard.add(row1);
+
+			KeyboardRow row2 = new KeyboardRow();
+			row2.add(BotLabels.LOG_OUT.getLabel());
+			keyboard.add(row2);
+
+			keyboardMarkup.setKeyboard(keyboard);
+			messageToTelegram.setReplyMarkup(keyboardMarkup);
+
+			try {
+				execute(messageToTelegram);
+			} catch (TelegramApiException e) {
+				logger.error(e.getLocalizedMessage(), e);
+				sendErrorMessage(chatId, "Error al mostrar opciones de manager: " + e.getLocalizedMessage());
+			} 
+		} else {
+			// Otros roles aquí
+			sendErrorMessage(chatId, "Rol no reconocido.");
 		}
 	}
 
