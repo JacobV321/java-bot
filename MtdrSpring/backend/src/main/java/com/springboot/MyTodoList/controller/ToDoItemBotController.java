@@ -28,6 +28,7 @@ import com.springboot.MyTodoList.model.Roles;
 import com.springboot.MyTodoList.model.Usuario;
 
 import com.springboot.MyTodoList.service.ToDoItemService;
+import com.springboot.MyTodoList.service.UsuarioService;
 import com.springboot.MyTodoList.util.BotCommands;
 import com.springboot.MyTodoList.util.BotHelper;
 import com.springboot.MyTodoList.util.BotLabels;
@@ -37,6 +38,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
 	private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
 	private ToDoItemService toDoItemService;
+	private UsuarioService usuarioService;
 	private String botName;
 	private UserAuthentication userAuthentication;
 
@@ -45,6 +47,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
 	private String status;
 	private int userID;
+	private int idEquipo;
+
 
 	public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService,
 			UserAuthentication userAuthentication) {
@@ -91,10 +95,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					String role = authenticationResult[2];
 					status = authenticationResult[2];
 					userID = Integer.parseInt(authenticationResult[3]);
+					idEquipo = Integer.parseInt(authenticationResult[4]);
 					sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role);
 
 					// Mostrar el teclado principal después del login exitoso
-					handleStartCommand(chatId, role);
+					handleStartCommand(chatId, role, idEquipo);
 
 				} else {
 					sendErrorMessage(chatId, authenticationResult[1]);
@@ -142,7 +147,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		} else if (role.equals("admin")) {
 			// Lógica para el rol de administrador
 			if (messageTextFromTelegram.equals(BotLabels.TEAM_LIST.getLabel())) {
-				handleTeamListCommand(chatId);
+				handleTeamListCommand(chatId, idEquipo);
 			} else {
 				sendErrorMessage(chatId, "Comando no reconocido para el rol admin.");
 			}
@@ -210,7 +215,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		}
 	}
 */
-	private void handleStartCommand(long chatId, String role) {
+	private void handleStartCommand(long chatId, String role, int idEquipo) {
 		if (role.equals("dev")) {
 			// Lógica para el rol de desarrollador
 			SendMessage messageToTelegram = new SendMessage();
@@ -254,7 +259,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
 			List<KeyboardRow> keyboard = new ArrayList<>();
 
-			// Añadir el botón para TEAM_LIST
 			KeyboardRow row1 = new KeyboardRow();
 			row1.add(BotLabels.TEAM_LIST.getLabel());
 			keyboard.add(row1);
@@ -271,25 +275,43 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			} catch (TelegramApiException e) {
 				logger.error(e.getLocalizedMessage(), e);
 				sendErrorMessage(chatId, "Error al mostrar opciones de manager: " + e.getLocalizedMessage());
-			} 
+			}
 		} else {
-			// Otros roles aquí
 			sendErrorMessage(chatId, "Rol no reconocido.");
 		}
 	}
 
-	public void handleTeamListCommand(long chatId) {
+	public void handleTeamListCommand(long chatId, int idEquipo) {
+		List<ToDoItem> teamItems = toDoItemService.findAllByIdEquipo(idEquipo);
+		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+		List<KeyboardRow> keyboard = new ArrayList<>();
+	
+		for (ToDoItem item : teamItems) {
+			KeyboardRow currentRow = new KeyboardRow();
+			Usuario user = usuarioService.findById(item.getIdUsuario());
+			currentRow.add(user.getNombre() + ": " + item.getDescription());
+			keyboard.add(currentRow);
+		}
+	
+		KeyboardRow mainScreenRowBottom = new KeyboardRow();
+		mainScreenRowBottom.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
+		keyboard.add(mainScreenRowBottom);
+	
+		keyboardMarkup.setKeyboard(keyboard);
+	
 		SendMessage messageToTelegram = new SendMessage();
 		messageToTelegram.setChatId(chatId);
-		messageToTelegram.setText("Lista de equipo");
-
+		messageToTelegram.setText("Lista de tareas del equipo:");
+		messageToTelegram.setReplyMarkup(keyboardMarkup);
+	
 		try {
 			execute(messageToTelegram);
 		} catch (TelegramApiException e) {
 			logger.error(e.getLocalizedMessage(), e);
+			sendErrorMessage(chatId, "Error al mostrar la lista del equipo: " + e.getLocalizedMessage());
 		}
 	}
-
+	
 
 	public void handleDoneCommand(long chatId, String messageTextFromTelegram) {
 		String done = messageTextFromTelegram.substring(0, messageTextFromTelegram.indexOf(BotLabels.DASH.getLabel()));

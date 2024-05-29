@@ -14,7 +14,7 @@ public class UserAuthentication {
     public String[] isAuthenticated(String username, String password) {
         Usuario usuario = usuarioRepository.findByNombre(username);
         if (usuario != null && usuario.getPassword().equals(password)) {
-            return new String[]{"true", usuario.getNombre(), usuario.getRol().getNombre(), String.valueOf(usuario.getID())};
+            return new String[]{"true", usuario.getNombre(), usuario.getRol().getNombre(), String.valueOf(usuario.getID()), String.valueOf(usuario.getIdEquipo())};
         }
         return new String[]{"false", "Credenciales inválidas. Por favor, inténtalo de nuevo."};
     }

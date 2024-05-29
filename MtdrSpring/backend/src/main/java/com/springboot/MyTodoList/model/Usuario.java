@@ -19,6 +19,9 @@ public class Usuario {
     @Column(name = "Password")
     private String password;
 
+    @Column(name = "ID_EQUIPO")
+    private int idEquipo;  // Nuevo campo
+
     // Getters and setters
     public int getID() {
         return ID;
@@ -50,5 +53,13 @@ public class Usuario {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getIdEquipo() {
+        return idEquipo;
+    }
+
+    public void setIdEquipo(int idEquipo) {
+        this.idEquipo = idEquipo;
     }
 }
