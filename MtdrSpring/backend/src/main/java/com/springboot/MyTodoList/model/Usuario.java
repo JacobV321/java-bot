@@ -13,6 +13,9 @@ public class Usuario {
     @JoinColumn(name = "ID_ROL")
     private Roles rol;
 
+    @Column(name = "ID_EQUIPO")
+    private int equipo;
+
     @Column(name = "Nombre")
     private String nombre;
 
@@ -42,6 +45,14 @@ public class Usuario {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public void setEquipo(int equipo) {
+        this.equipo = equipo;
+    }
+
+    public int getEquipo() {
+        return equipo;
     }
 
     public String getPassword() {

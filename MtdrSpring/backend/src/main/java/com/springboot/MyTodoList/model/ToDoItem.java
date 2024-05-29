@@ -1,6 +1,5 @@
 package com.springboot.MyTodoList.model;
 
-
 import javax.persistence.*;
 import java.time.OffsetDateTime;
 
@@ -14,17 +13,20 @@ public class ToDoItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int ID;
-    @Column(name = "ID_USUARIO")
-    int idUsuario; // Nuevo campo para almacenar el ID del usuario
-    @Column(name = "DESCRIPTION")
+    @ManyToOne
+    @JoinColumn(name = "ID_USUARIO", referencedColumnName = "ID")
+    int idUsuario;
+    @Column(name = "DESCRIPTION", length = 255)
     String description;
-    @Column(name = "CREATION_TS")
+    @Column(name = "CREATION_TS", length = 255)
     OffsetDateTime creation_ts;
     @Column(name = "done")
     boolean done;
-    public ToDoItem(){
+
+    public ToDoItem() {
 
     }
+
     public ToDoItem(int ID, int idUsuario, String description, OffsetDateTime creation_ts, boolean done) {
         this.ID = ID;
         this.idUsuario = idUsuario; // Inicializar el campo idUsuario

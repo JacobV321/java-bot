@@ -1,5 +1,6 @@
 package com.springboot.MyTodoList.controller;
 
+import com.springboot.MyTodoList.controller.TaskService;
 import com.springboot.MyTodoList.controller.UserAuthentication;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -39,9 +40,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	private ToDoItemService toDoItemService;
 	private String botName;
 	private UserAuthentication userAuthentication;
+	private TaskService taskService;
 
 	private Map<Long, Boolean> authenticatedUsers = new HashMap<>();
-	private Map<Long, Integer> authenticatedUserIds = new HashMap<>(); // Nuevo mapa para almacenar ID de usuarios autenticados
+	private Map<Long, Integer> authenticatedUserIds = new HashMap<>(); // Nuevo mapa para almacenar ID de usuarios
+																		// autenticados
 
 	private String status;
 	private int userID;
@@ -65,13 +68,14 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			// Verificar si el usuario está autenticado antes de manejar cualquier comando
 			Boolean isLoggedIn = authenticatedUsers.get(chatId);
 			if (isLoggedIn == null || !isLoggedIn) {
-				// Si el usuario no está autenticado y el comando no es /login, enviar mensaje de error
+				// Si el usuario no está autenticado y el comando no es /login, enviar mensaje
+				// de error
 				if (!messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
 					sendErrorMessage(chatId, "Haz el /login primero");
 					return;
 				}
 			}
-	
+
 			// Procesar comando de login por separado
 			if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
 				// Lógica de autenticación
@@ -86,7 +90,9 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				String[] authenticationResult = userAuthentication.isAuthenticated(username, password);
 				if (authenticationResult[0].equals("true")) {
 					authenticatedUsers.put(chatId, true);
-					authenticatedUserIds.put(chatId, Integer.parseInt(authenticationResult[3])); // Almacenar ID del usuario autenticado
+					authenticatedUserIds.put(chatId, Integer.parseInt(authenticationResult[3])); // Almacenar ID del
+																									// usuario
+																									// autenticado
 					String name = authenticationResult[1];
 					String role = authenticationResult[2];
 					status = authenticationResult[2];
@@ -100,7 +106,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					sendErrorMessage(chatId, authenticationResult[1]);
 				}
 			} else if (messageTextFromTelegram.equals(BotCommands.LOG_OUT.getCommand())
-				|| messageTextFromTelegram.equals(BotLabels.LOG_OUT.getLabel())) {
+					|| messageTextFromTelegram.equals(BotLabels.LOG_OUT.getLabel())) {
 				// Lógica de cierre de sesión
 				authenticatedUsers.remove(chatId); // Eliminar al usuario autenticado
 				authenticatedUserIds.remove(chatId); // Eliminar el ID del usuario autenticado
@@ -151,65 +157,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			sendErrorMessage(chatId, "Rol no reconocido.");
 		}
 	}
-/* 
-	public void handleDevCommand(long chatId) {
-		SendMessage messageToTelegram = new SendMessage();
-		messageToTelegram.setChatId(chatId);
-		messageToTelegram.setText("Dev Options:");
 
-		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-		List<KeyboardRow> keyboard = new ArrayList<>();
-
-		KeyboardRow row1 = new KeyboardRow();
-		row1.add(BotLabels.LIST_ALL_ITEMS.getLabel());
-		keyboard.add(row1);
-
-		KeyboardRow row2 = new KeyboardRow();
-		row2.add(BotLabels.SHOW_MAIN_SCREEN.getLabel());
-		row2.add(BotLabels.HIDE_MAIN_SCREEN.getLabel());
-		keyboard.add(row2);
-
-		KeyboardRow row3 = new KeyboardRow();
-		row3.add(BotLabels.LOG_OUT.getLabel());
-		keyboard.add(row3);
-
-		keyboardMarkup.setKeyboard(keyboard);
-		messageToTelegram.setReplyMarkup(keyboardMarkup);
-
-		try {
-			execute(messageToTelegram);
-		} catch (TelegramApiException e) {
-			logger.error(e.getLocalizedMessage(), e);
-		}
-	}
-	public void handleManagerCommand(long chatId) {
-		SendMessage messageToTelegram = new SendMessage();
-		messageToTelegram.setChatId(chatId);
-		messageToTelegram.setText("Opciones de Manager:");
-
-		ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-		List<KeyboardRow> keyboard = new ArrayList<>();
-
-		// Añadir el botón para TEAM_LIST
-		KeyboardRow row1 = new KeyboardRow();
-		row1.add(BotLabels.TEAM_LIST.getLabel());
-		keyboard.add(row1);
-
-		KeyboardRow row2 = new KeyboardRow();
-		row2.add(BotLabels.LOG_OUT.getLabel());
-		keyboard.add(row2);
-
-		keyboardMarkup.setKeyboard(keyboard);
-		messageToTelegram.setReplyMarkup(keyboardMarkup);
-
-		try {
-			execute(messageToTelegram);
-		} catch (TelegramApiException e) {
-			logger.error(e.getLocalizedMessage(), e);
-			sendErrorMessage(chatId, "Error al mostrar opciones de manager: " + e.getLocalizedMessage());
-		}
-	}
-*/
 	private void handleStartCommand(long chatId, String role) {
 		if (role.equals("dev")) {
 			// Lógica para el rol de desarrollador
@@ -271,7 +219,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			} catch (TelegramApiException e) {
 				logger.error(e.getLocalizedMessage(), e);
 				sendErrorMessage(chatId, "Error al mostrar opciones de manager: " + e.getLocalizedMessage());
-			} 
+			}
 		} else {
 			// Otros roles aquí
 			sendErrorMessage(chatId, "Rol no reconocido.");
@@ -279,9 +227,28 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	}
 
 	public void handleTeamListCommand(long chatId) {
+		Integer userId = authenticatedUserIds.get(chatId);
+		if (userId == null) {
+			sendErrorMessage(chatId, "Usuario no autenticado.");
+			return;
+		}
+
+		// Pasa el ID del usuario al método del servicio TaskService
+		List<ToDoItem> teamTasks = taskService.findTasksByUserIdAndTeamId(userId);
+
+		StringBuilder responseMessage = new StringBuilder("Tareas del equipo:\n");
+		if (teamTasks != null && !teamTasks.isEmpty()) {
+			for (ToDoItem task : teamTasks) {
+				responseMessage.append("ID: ").append(task.getID()).append(", Descripción: ")
+						.append(task.getDescription()).append("\n");
+			}
+		} else {
+			responseMessage.append("No hay tareas relacionadas con el equipo.");
+		}
+
 		SendMessage messageToTelegram = new SendMessage();
 		messageToTelegram.setChatId(chatId);
-		messageToTelegram.setText("Lista de equipo");
+		messageToTelegram.setText(responseMessage.toString());
 
 		try {
 			execute(messageToTelegram);
@@ -289,7 +256,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			logger.error(e.getLocalizedMessage(), e);
 		}
 	}
-
 
 	public void handleDoneCommand(long chatId, String messageTextFromTelegram) {
 		String done = messageTextFromTelegram.substring(0, messageTextFromTelegram.indexOf(BotLabels.DASH.getLabel()));
