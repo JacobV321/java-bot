@@ -124,7 +124,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			// Lógica para el rol de desarrollador
 			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
 					|| messageTextFromTelegram.equals(BotLabels.SHOW_MAIN_SCREEN.getLabel())) {
-				handleStartCommand(chatId, role);
+				handleStartCommand(chatId, role, idEquipo);
 			} else if (messageTextFromTelegram.contains(BotLabels.DONE.getLabel())) {
 				handleDoneCommand(chatId, messageTextFromTelegram);
 			} else if (messageTextFromTelegram.contains(BotLabels.UNDO.getLabel())) {
