@@ -224,8 +224,30 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	}
 
 	private void handleTeamListCommand(long chatId, int idEquipo) {
+		// Log inicial de inicio de comando
+		SendMessage messageToTelegram1 = new SendMessage();
+		messageToTelegram1.setChatId(chatId);
+		messageToTelegram1.setText("Iniciando el manejo de TEAM LIST para el equipo ID: " + idEquipo);
+		try {
+			execute(messageToTelegram1);
+		} catch (TelegramApiException e) {
+			logger.error(e.getLocalizedMessage(), e);
+		}
+	
+		// Obtener las tareas del equipo
 		List<ToDoItem> teamItems = toDoItemService.findAllByEquipo(idEquipo);
-		
+	
+		// Log de cantidad de tareas encontradas
+		SendMessage messageToTelegram2 = new SendMessage();
+		messageToTelegram2.setChatId(chatId);
+		messageToTelegram2.setText("Número de tareas encontradas para el equipo: " + teamItems.size());
+		try {
+			execute(messageToTelegram2);
+		} catch (TelegramApiException e) {
+			logger.error(e.getLocalizedMessage(), e);
+		}
+	
+		// Crear el mensaje de respuesta con la lista de tareas
 		StringBuilder responseText = new StringBuilder("Lista de tareas del equipo:\n");
 		for (ToDoItem item : teamItems) {
 			Usuario user = usuarioRepository.findById(item.getIdUsuario()).orElse(null);
@@ -234,20 +256,42 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 							.append(": ")
 							.append(item.getDescription())
 							.append("\n");
+			} else {
+				// Log de advertencia de usuario no encontrado
+				SendMessage messageToTelegram3 = new SendMessage();
+				messageToTelegram3.setChatId(chatId);
+				messageToTelegram3.setText("Advertencia: Usuario no encontrado para idUsuario: " + item.getIdUsuario());
+				try {
+					execute(messageToTelegram3);
+				} catch (TelegramApiException e) {
+					logger.error(e.getLocalizedMessage(), e);
+				}
 			}
 		}
-		
+	
+		// Enviar el mensaje final con la lista de tareas
 		SendMessage messageToTelegram = new SendMessage();
 		messageToTelegram.setChatId(chatId);
 		messageToTelegram.setText(responseText.toString());
 	
 		try {
 			execute(messageToTelegram);
+			// Log de éxito de envío de mensaje
+			SendMessage messageToTelegram4 = new SendMessage();
+			messageToTelegram4.setChatId(chatId);
+			messageToTelegram4.setText("Mensaje enviado correctamente.");
+			try {
+				execute(messageToTelegram4);
+			} catch (TelegramApiException e) {
+				logger.error(e.getLocalizedMessage(), e);
+			}
 		} catch (TelegramApiException e) {
-			logger.error(e.getLocalizedMessage(), e);
+			// Log de error al enviar el mensaje
+			logger.error("Error al enviar mensaje al chatId: " + chatId + " - " + e.getLocalizedMessage(), e);
 			sendErrorMessage(chatId, "Error al mostrar la lista de tareas del equipo: " + e.getLocalizedMessage());
 		}
 	}
+	
 	
 	
 
