@@ -13,8 +13,8 @@ public class ToDoItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int ID;
-    @ManyToOne
-    @JoinColumn(name = "ID_USUARIO", referencedColumnName = "ID")
+
+    @Column(name = "ID_USUARIO")
     int idUsuario;
     @Column(name = "DESCRIPTION", length = 255)
     String description;
