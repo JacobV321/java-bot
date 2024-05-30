@@ -266,13 +266,23 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 							.append(": ")
 							.append(item.getDescription())
 							.append("\n");
-			} else {
-				// Log de advertencia de usuario no encontrado
+	
+				// Log de usuario encontrado y tarea añadida al mensaje
 				SendMessage messageToTelegram4 = new SendMessage();
 				messageToTelegram4.setChatId(chatId);
-				messageToTelegram4.setText("Advertencia: Usuario no encontrado para idUsuario: " + item.getIdUsuario());
+				messageToTelegram4.setText("Añadida tarea al mensaje: " + user.getNombre() + ": " + item.getDescription());
 				try {
 					execute(messageToTelegram4);
+				} catch (TelegramApiException e) {
+					logger.error(e.getLocalizedMessage(), e);
+				}
+			} else {
+				// Log de advertencia de usuario no encontrado
+				SendMessage messageToTelegram5 = new SendMessage();
+				messageToTelegram5.setChatId(chatId);
+				messageToTelegram5.setText("Advertencia: Usuario no encontrado para idUsuario: " + item.getIdUsuario());
+				try {
+					execute(messageToTelegram5);
 				} catch (TelegramApiException e) {
 					logger.error(e.getLocalizedMessage(), e);
 				}
@@ -280,11 +290,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		}
 	
 		// Log final de mensaje de respuesta construido
-		SendMessage messageToTelegram5 = new SendMessage();
-		messageToTelegram5.setChatId(chatId);
-		messageToTelegram5.setText("Mensaje de respuesta construido: " + responseText.toString());
+		SendMessage messageToTelegram6 = new SendMessage();
+		messageToTelegram6.setChatId(chatId);
+		messageToTelegram6.setText("Mensaje de respuesta construido: " + responseText.toString());
 		try {
-			execute(messageToTelegram5);
+			execute(messageToTelegram6);
 		} catch (TelegramApiException e) {
 			logger.error(e.getLocalizedMessage(), e);
 		}
@@ -297,11 +307,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		try {
 			execute(messageToTelegram);
 			// Log de éxito de envío de mensaje
-			SendMessage messageToTelegram6 = new SendMessage();
-			messageToTelegram6.setChatId(chatId);
-			messageToTelegram6.setText("Mensaje enviado correctamente.");
+			SendMessage messageToTelegram7 = new SendMessage();
+			messageToTelegram7.setChatId(chatId);
+			messageToTelegram7.setText("Mensaje enviado correctamente.");
 			try {
-				execute(messageToTelegram6);
+				execute(messageToTelegram7);
 			} catch (TelegramApiException e) {
 				logger.error(e.getLocalizedMessage(), e);
 			}
@@ -311,6 +321,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			sendErrorMessage(chatId, "Error al mostrar la lista de tareas del equipo: " + e.getLocalizedMessage());
 		}
 	}
+	
 	
 	
 	
