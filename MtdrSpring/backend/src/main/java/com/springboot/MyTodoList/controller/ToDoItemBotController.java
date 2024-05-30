@@ -250,6 +250,16 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		// Crear el mensaje de respuesta con la lista de tareas
 		StringBuilder responseText = new StringBuilder("Lista de tareas del equipo:\n");
 		for (ToDoItem item : teamItems) {
+			// Log de detalle de cada tarea
+			SendMessage messageToTelegram3 = new SendMessage();
+			messageToTelegram3.setChatId(chatId);
+			messageToTelegram3.setText("Procesando tarea ID: " + item.getID() + ", Usuario ID: " + item.getIdUsuario() + ", Descripción: " + item.getDescription());
+			try {
+				execute(messageToTelegram3);
+			} catch (TelegramApiException e) {
+				logger.error(e.getLocalizedMessage(), e);
+			}
+	
 			Usuario user = usuarioRepository.findById(item.getIdUsuario()).orElse(null);
 			if (user != null) {
 				responseText.append(user.getNombre())
@@ -258,15 +268,25 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 							.append("\n");
 			} else {
 				// Log de advertencia de usuario no encontrado
-				SendMessage messageToTelegram3 = new SendMessage();
-				messageToTelegram3.setChatId(chatId);
-				messageToTelegram3.setText("Advertencia: Usuario no encontrado para idUsuario: " + item.getIdUsuario());
+				SendMessage messageToTelegram4 = new SendMessage();
+				messageToTelegram4.setChatId(chatId);
+				messageToTelegram4.setText("Advertencia: Usuario no encontrado para idUsuario: " + item.getIdUsuario());
 				try {
-					execute(messageToTelegram3);
+					execute(messageToTelegram4);
 				} catch (TelegramApiException e) {
 					logger.error(e.getLocalizedMessage(), e);
 				}
 			}
+		}
+	
+		// Log final de mensaje de respuesta construido
+		SendMessage messageToTelegram5 = new SendMessage();
+		messageToTelegram5.setChatId(chatId);
+		messageToTelegram5.setText("Mensaje de respuesta construido: " + responseText.toString());
+		try {
+			execute(messageToTelegram5);
+		} catch (TelegramApiException e) {
+			logger.error(e.getLocalizedMessage(), e);
 		}
 	
 		// Enviar el mensaje final con la lista de tareas
@@ -277,11 +297,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		try {
 			execute(messageToTelegram);
 			// Log de éxito de envío de mensaje
-			SendMessage messageToTelegram4 = new SendMessage();
-			messageToTelegram4.setChatId(chatId);
-			messageToTelegram4.setText("Mensaje enviado correctamente.");
+			SendMessage messageToTelegram6 = new SendMessage();
+			messageToTelegram6.setChatId(chatId);
+			messageToTelegram6.setText("Mensaje enviado correctamente.");
 			try {
-				execute(messageToTelegram4);
+				execute(messageToTelegram6);
 			} catch (TelegramApiException e) {
 				logger.error(e.getLocalizedMessage(), e);
 			}
@@ -291,6 +311,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			sendErrorMessage(chatId, "Error al mostrar la lista de tareas del equipo: " + e.getLocalizedMessage());
 		}
 	}
+	
 	
 	
 	
