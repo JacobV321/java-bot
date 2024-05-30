@@ -114,12 +114,12 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 						"¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
 			} else {
 				// Manejar otros comandos según el rol del usuario
-				handleUserCommands(chatId, messageTextFromTelegram, status, userID);
+				handleUserCommands(chatId, messageTextFromTelegram, status, userID, idEquipo);
 			}
 		}
 	}
 
-	private void handleUserCommands(long chatId, String messageTextFromTelegram, String role, int userID) {
+	private void handleUserCommands(long chatId, String messageTextFromTelegram, String role, int userID, int idEquipo) {
 		if (role.equals("dev")) {
 			// Lógica para el rol de desarrollador
 			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
