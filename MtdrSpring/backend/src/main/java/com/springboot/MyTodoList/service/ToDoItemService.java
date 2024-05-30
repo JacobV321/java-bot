@@ -3,6 +3,8 @@ package com.springboot.MyTodoList.service;
 import com.springboot.MyTodoList.model.ToDoItem;
 import com.springboot.MyTodoList.model.Usuario;
 import com.springboot.MyTodoList.repository.ToDoItemRepository;
+import com.springboot.MyTodoList.repository.UsuarioRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +21,7 @@ public class ToDoItemService {
     private ToDoItemRepository toDoItemRepository;
 
     @Autowired
-    private UsuarioService usuarioService;  // Asegúrate de tener un servicio de usuario
+    private UsuarioRepository usuarioRepository;
 
 
     public List<ToDoItem> findAll(){
@@ -27,11 +29,12 @@ public class ToDoItemService {
         return todoItems;
     }
 
-    public List<ToDoItem> findAllByIdEquipo(int idEquipo) {
-        List<Usuario> usuarios = usuarioService.findAllByIdEquipo(idEquipo);
+    public List<ToDoItem> findAllByEquipo(int idEquipo) {
+        List<Usuario> usuarios = usuarioRepository.findAllByIdEquipo(idEquipo);
         List<Integer> userIds = usuarios.stream().map(Usuario::getID).collect(Collectors.toList());
-        return toDoItemRepository.findAllByidUsuarioIn(userIds);
+        return toDoItemRepository.findAllByIdUsuarioIn(userIds);
     }
+
 
 
 
