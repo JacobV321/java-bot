@@ -38,7 +38,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
 	private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
 	private ToDoItemService toDoItemService;
-    private UsuarioRepository usuarioRepository;
+    private UsuarioService usuarioService;
 	private String botName;
 	private UserAuthentication userAuthentication;
 
@@ -261,7 +261,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					logger.error(e.getLocalizedMessage(), e);
 				}
 	
-				Usuario user = usuarioRepository.findById(item.getIdUsuario()).orElse(null);
+				// Obtener el usuario asociado a la tarea utilizando UsuarioService
+				Usuario user = usuarioService.findById(item.getIdUsuario());
 				if (user != null) {
 					responseText.append(user.getNombre())
 								.append(": ")
@@ -291,9 +292,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			} catch (Exception e) {
 				// Log de cualquier excepción durante el procesamiento de las tareas
 				logger.error("Error procesando tarea ID: " + item.getID() + " - " + e.getLocalizedMessage(), e);
+	
+				// Enviar log detallado de la excepción
 				SendMessage errorLogMessage = new SendMessage();
 				errorLogMessage.setChatId(chatId);
-				errorLogMessage.setText("Error procesando tarea ID: " + item.getID() + " - " + e.getLocalizedMessage());
+				errorLogMessage.setText("Error procesando tarea ID: " + item.getID() + " - " + e.toString());
 				try {
 					execute(errorLogMessage);
 				} catch (TelegramApiException ex) {
