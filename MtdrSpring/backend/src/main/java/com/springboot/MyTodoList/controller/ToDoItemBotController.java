@@ -39,6 +39,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	private static final Logger logger = LoggerFactory.getLogger(ToDoItemBotController.class);
 	private ToDoItemService toDoItemService;
     private UsuarioService usuarioService;
+	private UsuarioRepository usuariorRepository;
+
 	private String botName;
 	private UserAuthentication userAuthentication;
 
