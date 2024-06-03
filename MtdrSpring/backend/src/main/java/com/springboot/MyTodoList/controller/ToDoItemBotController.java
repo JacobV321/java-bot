@@ -237,14 +237,14 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		for (ToDoItem item : teamItems) {
 			logger.info("Procesando tarea ID: " + item.getID() + ", Usuario ID: " + item.getIdUsuario() + ", Descripción: " + item.getDescription());
 			try {
-				// Obtener el usuario asociado a la tarea utilizando UsuarioService
-				Usuario user = usuarioService.findById(item.getIdUsuario());
-				if (user != null) {
-					responseText.append(user.getNombre())
+				// Obtener el nombre del usuario asociado a la tarea utilizando UsuarioService
+				String userName = usuarioService.findUserNameById(item.getIdUsuario());
+				if (userName != null) {
+					responseText.append(userName)
 								.append(": ")
 								.append(item.getDescription())
 								.append("\n");
-					logger.info("Usuario encontrado: " + user.getNombre());
+					logger.info("Nombre de usuario encontrado: " + userName);
 				} else {
 					logger.error("Usuario no encontrado para ID: " + item.getIdUsuario());
 				}

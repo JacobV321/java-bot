@@ -22,13 +22,10 @@ public class UsuarioService {
         return usuarioRepository.findAllByIdEquipo(idEquipo);
     }
 
-    public Usuario findById(int id) {
+    public String findUserNameById(int id) {
         Usuario usuario = usuarioRepository.findById(id).orElse(null);
-        if (usuario == null) {
-            logger.error("Usuario no encontrado para ID: " + id);
-        } else {
-            logger.info("Usuario encontrado: " + usuario.getNombre() + " (ID: " + id + ")");
-        }
-        return usuario;
+        return (usuario != null) ? usuario.getNombre() : null;
     }
+
 }
+    
