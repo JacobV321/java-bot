@@ -23,9 +23,9 @@ public class UsuarioService {
     }
 
     public String findUserNameById(int id) {
-        Usuario usuario = usuarioRepository.findById(id).orElse(null);
-        return (usuario != null) ? usuario.getNombre() : null;
+        Usuario usuario = usuarioRepository.findById(id);
+        return usuario.getNombre();
     }
-
+    
 }
     
