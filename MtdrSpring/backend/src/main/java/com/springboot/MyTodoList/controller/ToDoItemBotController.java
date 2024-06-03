@@ -250,41 +250,54 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		// Crear el mensaje de respuesta con la lista de tareas
 		StringBuilder responseText = new StringBuilder("Lista de tareas del equipo:\n");
 		for (ToDoItem item : teamItems) {
-			// Log de detalle de cada tarea
-			SendMessage messageToTelegram3 = new SendMessage();
-			messageToTelegram3.setChatId(chatId);
-			messageToTelegram3.setText("Procesando tarea ID: " + item.getID() + ", Usuario ID: " + item.getIdUsuario() + ", Descripción: " + item.getDescription());
 			try {
-				execute(messageToTelegram3);
-			} catch (TelegramApiException e) {
-				logger.error(e.getLocalizedMessage(), e);
-			}
-	
-			Usuario user = usuarioRepository.findById(item.getIdUsuario()).orElse(null);
-			if (user != null) {
-				responseText.append(user.getNombre())
-							.append(": ")
-							.append(item.getDescription())
-							.append("\n");
-	
-				// Log de usuario encontrado y tarea añadida al mensaje
-				SendMessage messageToTelegram4 = new SendMessage();
-				messageToTelegram4.setChatId(chatId);
-				messageToTelegram4.setText("Añadida tarea al mensaje: " + user.getNombre() + ": " + item.getDescription());
+				// Log de detalle de cada tarea
+				SendMessage messageToTelegram3 = new SendMessage();
+				messageToTelegram3.setChatId(chatId);
+				messageToTelegram3.setText("Procesando tarea ID: " + item.getID() + ", Usuario ID: " + item.getIdUsuario() + ", Descripción: " + item.getDescription());
 				try {
-					execute(messageToTelegram4);
+					execute(messageToTelegram3);
 				} catch (TelegramApiException e) {
 					logger.error(e.getLocalizedMessage(), e);
 				}
-			} else {
-				// Log de advertencia de usuario no encontrado
-				SendMessage messageToTelegram5 = new SendMessage();
-				messageToTelegram5.setChatId(chatId);
-				messageToTelegram5.setText("Advertencia: Usuario no encontrado para idUsuario: " + item.getIdUsuario());
+	
+				Usuario user = usuarioRepository.findById(item.getIdUsuario()).orElse(null);
+				if (user != null) {
+					responseText.append(user.getNombre())
+								.append(": ")
+								.append(item.getDescription())
+								.append("\n");
+	
+					// Log de usuario encontrado y tarea añadida al mensaje
+					SendMessage messageToTelegram4 = new SendMessage();
+					messageToTelegram4.setChatId(chatId);
+					messageToTelegram4.setText("Añadida tarea al mensaje: " + user.getNombre() + ": " + item.getDescription());
+					try {
+						execute(messageToTelegram4);
+					} catch (TelegramApiException e) {
+						logger.error(e.getLocalizedMessage(), e);
+					}
+				} else {
+					// Log de advertencia de usuario no encontrado
+					SendMessage messageToTelegram5 = new SendMessage();
+					messageToTelegram5.setChatId(chatId);
+					messageToTelegram5.setText("Advertencia: Usuario no encontrado para idUsuario: " + item.getIdUsuario());
+					try {
+						execute(messageToTelegram5);
+					} catch (TelegramApiException e) {
+						logger.error(e.getLocalizedMessage(), e);
+					}
+				}
+			} catch (Exception e) {
+				// Log de cualquier excepción durante el procesamiento de las tareas
+				logger.error("Error procesando tarea ID: " + item.getID() + " - " + e.getLocalizedMessage(), e);
+				SendMessage errorLogMessage = new SendMessage();
+				errorLogMessage.setChatId(chatId);
+				errorLogMessage.setText("Error procesando tarea ID: " + item.getID() + " - " + e.getLocalizedMessage());
 				try {
-					execute(messageToTelegram5);
-				} catch (TelegramApiException e) {
-					logger.error(e.getLocalizedMessage(), e);
+					execute(errorLogMessage);
+				} catch (TelegramApiException ex) {
+					logger.error(ex.getLocalizedMessage(), ex);
 				}
 			}
 		}
@@ -321,6 +334,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			sendErrorMessage(chatId, "Error al mostrar la lista de tareas del equipo: " + e.getLocalizedMessage());
 		}
 	}
+	
 	
 	
 	
