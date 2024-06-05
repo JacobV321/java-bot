@@ -245,6 +245,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		} catch (TelegramApiException e) {
 			logger.error(e.getLocalizedMessage(), e);
 		}
+		
 	
 		StringBuilder responseText = new StringBuilder("Lista de tareas del equipo:\n");
 		for (ToDoItem item : teamItems) {
