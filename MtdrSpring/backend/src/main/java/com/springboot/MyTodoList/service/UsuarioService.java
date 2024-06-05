@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
+
 
 @Service
 public class UsuarioService {
@@ -23,13 +25,14 @@ public class UsuarioService {
     }
 
     public Usuario findById(int id) {
-        Usuario usuario = usuarioRepository.findById(id);
-        if (usuario == null) {
-            logger.error("Usuario no encontrado para ID: " + id);
-        } else {
+        Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
+        if (optionalUsuario.isPresent()) {
+            Usuario usuario = optionalUsuario.get();
             logger.info("Usuario encontrado: " + usuario.getNombre() + " (ID: " + id + ")");
+            return usuario;
+        } else {
+            logger.error("Usuario no encontrado para ID: " + id);
+            return null;
         }
-        return usuario;
     }
 }
-    
