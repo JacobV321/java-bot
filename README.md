@@ -42,3 +42,28 @@ This project is an Oracle Java Bot designed to automate tasks and provide visibi
 To start the bot, run the following command:
 ```bash
 java -jar target/java-bot.jar
+
+The bot will connect to Telegram and start processing commands.
+
+## Architecture
+!Architecture Diagram
+The architecture consists of the following components:
+- Telegram API Integration
+- Task Scheduler
+- Notification System
+- CI/CD Pipeline
+
+## ER Diagram
+!ER Diagram
+The ER diagram shows the relationships between entities, including primary keys, foreign keys, and relation types. The database is designed to be in the 2nd Normal Form.
+
+## Design Patterns
+The project implements several design patterns, including:
+- Singleton for bot instance management
+- Factory for creating different types of tasks
+- Observer for real-time notifications
+
+## Testing
+The project includes unit tests and integration tests. To run the tests, use the following command:
+```bash
+mvn test
