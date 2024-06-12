@@ -9,21 +9,7 @@ This project is an Oracle Java Bot designed to automate tasks and provide visibi
 - Integration with CI/CD pipelines
 - User-friendly interface via Telegram
 
-## Table of Contents
-- Installation
-- Usage
-- Architecture
-- ER Diagram
-- Design Patterns
-- Testing
-- CI/CD
-- Documentation
-- Terms & Conditions
-- Lessons Learned
-- Contributing
-- License
-
-## Installation
+## Installation ??
 1. Clone the repository:
     ```bash
     git clone https://github.com/JacobV321/java-bot.git
@@ -38,7 +24,7 @@ This project is an Oracle Java Bot designed to automate tasks and provide visibi
     ```
 4. Configure the bot with your Telegram API key and other settings in the `config.properties` file.
 
-## Usage
+## Usage ??
 To start the bot, run the following command:
 ```bash
 java -jar target/java-bot.jar
@@ -46,25 +32,14 @@ java -jar target/java-bot.jar
 
 The bot will connect to Telegram and start processing commands.
 
-## Architecture
-!Architecture Diagram
-The architecture consists of the following components:
-- Telegram API Integration
-- Task Scheduler
-- Notification System
-- CI/CD Pipeline
+## Contributing
+Contributions are welcome! Please follow these steps:
 
-## ER Diagram
-!ER Diagram
-The ER diagram shows the relationships between entities, including primary keys, foreign keys, and relation types. The database is designed to be in the 2nd Normal Form.
+1. Fork the repository.
+2. Create a new branch: ``git checkout -b feature-name``
+3. Make your changes.
+4. Push your branch: ``git push origin feature-name``
+5. Create a pull request.
 
-## Design Patterns
-The project implements several design patterns, including:
-- Singleton for bot instance management
-- Factory for creating different types of tasks
-- Observer for real-time notifications
-
-## Testing
-The project includes unit tests and integration tests. To run the tests, use the following command:
-```bash
-mvn test
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.
