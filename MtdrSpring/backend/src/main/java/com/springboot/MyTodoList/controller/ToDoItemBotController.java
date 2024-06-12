@@ -66,7 +66,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			if (isLoggedIn == null || !isLoggedIn) {
 				// Si el usuario no está autenticado y el comando no es /login, enviar mensaje de error
 				if (!messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
-					sendErrorMessage(chatId, "Haz el /login primero");
+					sendErrorMessage(chatId, "🔒 Por favor, haz el /login primero.");
 					return;
 				}
 			}
@@ -77,7 +77,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				String[] parts = messageTextFromTelegram.split("\\s+", 3);
 				if (parts.length != 3) {
 					sendErrorMessage(chatId,
-							"Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario contraseña");
+							"❗ Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario contraseña");
 					return;
 				}
 				String username = parts[1];
@@ -91,7 +91,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					status = authenticationResult[2];
 					userID = Integer.parseInt(authenticationResult[3]);
 					idEquipo = Integer.parseInt(authenticationResult[4]);
-					sendSuccessMessage(chatId, "¡Hola " + name + "! Eres un " + role + " tu ID: " + userID + " y Equipo: " + idEquipo);
+					sendSuccessMessage(chatId, "👋 ¡Hola " + name + "! Tienes un rol de " + role);
 
 					// Mostrar el teclado principal después del login exitoso
 					handleStartCommand(chatId, role, idEquipo);
@@ -106,7 +106,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				authenticatedUserIds.remove(chatId); // Eliminar el ID del usuario autenticado
 
 				sendSuccessMessage(chatId,
-						"¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
+			"🔓 ¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
 			} else {
 				// Manejar otros comandos según el rol del usuario
 				handleUserCommands(chatId, messageTextFromTelegram, status, userID, idEquipo);
@@ -144,11 +144,11 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			if (messageTextFromTelegram.equals(BotLabels.TEAM_LIST.getLabel())) {
 				handleTeamListCommand(chatId, idEquipo);
 			} else {
-				sendErrorMessage(chatId, "Comando no reconocido para el rol admin.");
+				sendErrorMessage(chatId, "❗ Comando no reconocido para el rol admin.");
 			}
 		} else {
 			// Otros roles aquí
-			sendErrorMessage(chatId, "Rol no reconocido.");
+			sendErrorMessage(chatId, "❗ Rol no reconocido.");
 		}
 	}
 
@@ -157,7 +157,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			// Lógica para el rol de desarrollador
 			SendMessage messageToTelegram = new SendMessage();
 			messageToTelegram.setChatId(chatId);
-			messageToTelegram.setText("¡Bienvenido! Selecciona una opción:");
+			messageToTelegram.setText("👨‍💻 ¡Bienvenido! Selecciona una opción:");
 
 			ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
 			List<KeyboardRow> keyboard = new ArrayList<>();
@@ -186,12 +186,12 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				execute(messageToTelegram);
 			} catch (TelegramApiException e) {
 				logger.error(e.getLocalizedMessage(), e);
-				sendErrorMessage(chatId, "Error al mostrar el menú principal: " + e.getLocalizedMessage());
+				sendErrorMessage(chatId, "❗ Error al mostrar el menú principal: " + e.getLocalizedMessage());
 			}
 		} else if (role.equals("admin")) {
 			SendMessage messageToTelegram = new SendMessage();
 			messageToTelegram.setChatId(chatId);
-			messageToTelegram.setText("Opciones de Manager:");
+			messageToTelegram.setText("🛠 Opciones de Manager:");
 
 			ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
 			List<KeyboardRow> keyboard = new ArrayList<>();
@@ -211,7 +211,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 				execute(messageToTelegram);
 			} catch (TelegramApiException e) {
 				logger.error(e.getLocalizedMessage(), e);
-				sendErrorMessage(chatId, "Error al mostrar opciones de manager: " + e.getLocalizedMessage());
+				sendErrorMessage(chatId, "❗ Error al mostrar el menú principal: " + e.getLocalizedMessage());
 			}
 		} else {
 			sendErrorMessage(chatId, "Rol no reconocido.");
@@ -225,7 +225,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		List<ToDoItem> teamItems = toDoItemService.findAllByEquipo(idEquipo);
 	
 		// Crear el mensaje de respuesta con la lista de tareas
-		StringBuilder responseText = new StringBuilder("Lista de tareas del equipo:\n");
+		StringBuilder responseText = new StringBuilder("📋 Tareas del equipo:\n");
 		for (ToDoItem item : teamItems) {
 			try {
 				// Añadir ID de usuario y descripción al mensaje de respuesta
