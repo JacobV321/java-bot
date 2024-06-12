@@ -42,6 +42,7 @@ This project is an Oracle Java Bot designed to automate tasks and provide visibi
 To start the bot, run the following command:
 ```bash
 java -jar target/java-bot.jar
+```
 
 The bot will connect to Telegram and start processing commands.
 
