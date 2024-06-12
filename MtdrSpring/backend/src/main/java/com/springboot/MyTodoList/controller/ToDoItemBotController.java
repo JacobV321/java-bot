@@ -80,6 +80,7 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 							"❗ Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario contraseña");
 					return;
 				}
+				
 				String username = parts[1];
 				String password = parts[2];
 				String[] authenticationResult = userAuthentication.isAuthenticated(username, password);
