@@ -291,10 +291,30 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		Integer id = Integer.valueOf(delete);
 
 		try {
+			// Verificar si la tarea existe
+			ResponseEntity<ToDoItem> responseEntity = getToDoItemById(id);
+			ToDoItem item = responseEntity.getBody();
+
+			if (item == null || responseEntity.getStatusCode() == HttpStatus.NOT_FOUND) {
+				// Si la tarea no existe, enviar un mensaje de error
+				BotHelper.sendMessageToTelegram(chatId, "❗ La tarea con ID " + id + " no existe.", this);
+				return;
+			}
+
+			// Verificar si la tarea pertenece al usuario autenticado
+			if (item.getIdUsuario() != authenticatedUserIds.get(chatId)) {
+				// Si la tarea no pertenece al usuario, enviar un mensaje de error
+				BotHelper.sendMessageToTelegram(chatId, "❗ No tienes permiso para eliminar la tarea con ID " + id + ".",
+						this);
+				return;
+			}
+
+			// Si la tarea existe y pertenece al usuario, proceder a eliminarla
 			deleteToDoItem(id).getBody();
 			BotHelper.sendMessageToTelegram(chatId, BotMessages.ITEM_DELETED.getMessage(), this);
 		} catch (Exception e) {
 			logger.error(e.getLocalizedMessage(), e);
+			BotHelper.sendMessageToTelegram(chatId, "❗ Ocurrió un error al intentar eliminar la tarea.", this);
 		}
 	}
 
