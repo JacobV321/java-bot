@@ -38,12 +38,12 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 	private UserAuthentication userAuthentication;
 
 	private Map<Long, Boolean> authenticatedUsers = new HashMap<>();
-	private Map<Long, Integer> authenticatedUserIds = new HashMap<>(); // Nuevo mapa para almacenar ID de usuarios autenticados
+	private Map<Long, Integer> authenticatedUserIds = new HashMap<>(); // Nuevo mapa para almacenar ID de usuarios
+																		// autenticados
 
 	private String status;
 	private int userID;
 	private int idEquipo;
-
 
 	public ToDoItemBotController(String botToken, String botName, ToDoItemService toDoItemService,
 			UserAuthentication userAuthentication) {
@@ -64,13 +64,14 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			// Verificar si el usuario está autenticado antes de manejar cualquier comando
 			Boolean isLoggedIn = authenticatedUsers.get(chatId);
 			if (isLoggedIn == null || !isLoggedIn) {
-				// Si el usuario no está autenticado y el comando no es /login, enviar mensaje de error
+				// Si el usuario no está autenticado y el comando no es /login, enviar mensaje
+				// de error
 				if (!messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
 					sendErrorMessage(chatId, "🔒 Por favor, haz el /login primero.");
 					return;
 				}
 			}
-	
+
 			// Procesar comando de login por separado
 			if (messageTextFromTelegram.startsWith(BotCommands.LOG_IN.getCommand())) {
 				// Lógica de autenticación
@@ -80,13 +81,15 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 							"❗ Por favor, introduce tu nombre de usuario y contraseña en el siguiente formato: /login usuario contraseña");
 					return;
 				}
-				
+
 				String username = parts[1];
 				String password = parts[2];
 				String[] authenticationResult = userAuthentication.isAuthenticated(username, password);
 				if (authenticationResult[0].equals("true")) {
 					authenticatedUsers.put(chatId, true);
-					authenticatedUserIds.put(chatId, Integer.parseInt(authenticationResult[3])); // Almacenar ID del usuario autenticado
+					authenticatedUserIds.put(chatId, Integer.parseInt(authenticationResult[3])); // Almacenar ID del
+																									// usuario
+																									// autenticado
 					String name = authenticationResult[1];
 					String role = authenticationResult[2];
 					status = authenticationResult[2];
@@ -101,13 +104,13 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 					sendErrorMessage(chatId, authenticationResult[1]);
 				}
 			} else if (messageTextFromTelegram.equals(BotCommands.LOG_OUT.getCommand())
-				|| messageTextFromTelegram.equals(BotLabels.LOG_OUT.getLabel())) {
+					|| messageTextFromTelegram.equals(BotLabels.LOG_OUT.getLabel())) {
 				// Lógica de cierre de sesión
 				authenticatedUsers.remove(chatId); // Eliminar al usuario autenticado
 				authenticatedUserIds.remove(chatId); // Eliminar el ID del usuario autenticado
 
 				sendSuccessMessage(chatId,
-			"🔓 ¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
+						"🔓 ¡Sesión cerrada exitosamente! Puedes usar /login para iniciar sesión nuevamente.");
 			} else {
 				// Manejar otros comandos según el rol del usuario
 				handleUserCommands(chatId, messageTextFromTelegram, status, userID, idEquipo);
@@ -115,7 +118,8 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		}
 	}
 
-	private void handleUserCommands(long chatId, String messageTextFromTelegram, String role, int userID, int idEquipo) {
+	private void handleUserCommands(long chatId, String messageTextFromTelegram, String role, int userID,
+			int idEquipo) {
 		if (role.equals("dev")) {
 			// Lógica para el rol de desarrollador
 			if (messageTextFromTelegram.equals(BotCommands.START_COMMAND.getCommand())
@@ -219,33 +223,31 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 		}
 	}
 
-
-
 	private void handleTeamListCommand(long chatId, int idEquipo) {
 		// Obtener las tareas del equipo
 		List<ToDoItem> teamItems = toDoItemService.findAllByEquipo(idEquipo);
-	
+
 		// Crear el mensaje de respuesta con la lista de tareas
 		StringBuilder responseText = new StringBuilder("📋 Tareas del equipo:\n");
 		for (ToDoItem item : teamItems) {
 			try {
 				// Añadir ID de usuario y descripción al mensaje de respuesta
 				responseText.append("ID: ")
-							.append(item.getIdUsuario())
-							.append("/ ")
-							.append(item.getDescription())
-							.append("\n");
+						.append(item.getIdUsuario())
+						.append("/ ")
+						.append(item.getDescription())
+						.append("\n");
 			} catch (Exception e) {
 				// Log de cualquier excepción durante el procesamiento de las tareas
 				logger.error("Error procesando tarea ID: " + item.getID() + " - " + e.getLocalizedMessage(), e);
 			}
 		}
-	
+
 		// Enviar el mensaje final con la lista de tareas
 		SendMessage messageToTelegram = new SendMessage();
 		messageToTelegram.setChatId(chatId);
 		messageToTelegram.setText(responseText.toString());
-	
+
 		try {
 			execute(messageToTelegram);
 		} catch (TelegramApiException e) {
@@ -254,12 +256,6 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 			sendErrorMessage(chatId, "Error al mostrar la lista de tareas del equipo: " + e.getLocalizedMessage());
 		}
 	}
-	
-	
-	
-	
-	
-	
 
 	public void handleDoneCommand(long chatId, String messageTextFromTelegram) {
 		String done = messageTextFromTelegram.substring(0, messageTextFromTelegram.indexOf(BotLabels.DASH.getLabel()));
@@ -376,6 +372,17 @@ public class ToDoItemBotController extends TelegramLongPollingBot {
 
 	public void handleNewItem(long chatId, int userID, String messageTextFromTelegram) {
 		try {
+			if (!messageTextFromTelegram.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+")) {
+				sendErrorMessage(chatId, "❗ La descripción de la tarea solo puede contener letras y espacios.");
+				return;
+			}
+
+			// Validar que el usuario no tenga más de 10 tareas
+			List<ToDoItem> userItems = getAllToDoItemsByidUsuario(userID);
+			if (userItems.size() >= 10) {
+				sendErrorMessage(chatId, "❗ Solo puedes tener un máximo de 10 tareas.");
+				return;
+			}
 			ToDoItem newItem = new ToDoItem();
 			newItem.setIdUsuario(userID);
 			newItem.setDescription(messageTextFromTelegram);
